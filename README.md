@@ -1,134 +1,270 @@
 # ofd-cli
 
-Command-line tool for **OFD** (Open Fixed-layout Document, 国标 GB/T 33190-2016) processing.
+Command-line tool for **OFD** (Open Fixed-layout Document) processing, built
+on [ofdrw](https://github.com/ofdrw/ofdrw). Single static binary — no
+JRE/JDK install required on the target machine.
 
-Built on top of [ofdrw](https://github.com/ofdrw/ofdrw) (Apache 2.0). Single binary, zero JRE dependency, AI-friendly.
-
-## Status
-
-🚧 **0.2.0-SNAPSHOT — `version` + `to-png` working, native-image PoC validated**
-
-Both the fat-jar (JVM) and the GraalVM native-image build render Chinese OFD
-invoices (滴滴电子发票 etc.) to PNG correctly. Native binary is ~38MB,
-zero JRE dependency, cold-starts in ~25ms.
-
-## Subcommands
-
-| Command | Status | Description |
-|---------|--------|-------------|
-| `ofd version` | ✅ | Print tool / JVM / OS info (human or `--json`) |
-| `ofd to-png` | ✅ | Render OFD page(s) to PNG, batch directory supported |
-| `ofd info` | 🔜 v0.2 | Show OFD metadata (pages, dimensions, signatures, attachments) |
-| `ofd to-pdf` | 🔜 v0.2 | Export OFD to PDF |
-| `ofd extract` | 🔜 v0.2 | Extract text content |
-| `ofd to-html` / `to-svg` / `merge` | 🔜 v0.3 | more formats + composite |
-| `ofd sign` / `verify` / `encrypt` / `decrypt` / `validate` | 🔜 v0.4 | crypto + OFD-A |
+```
+$ ofd --help
+Usage: ofd [-hV] [--json] [COMMAND]
+Command-line tool for OFD (Open Fixed-layout Document) processing.
+Commands:
+  version   Print version information and exit.
+  info      Show OFD document metadata.
+  to-png    Convert OFD file(s) to PNG images.
+  to-pdf    Convert OFD file(s) to PDF.
+  to-html   Convert OFD file(s) to HTML.
+  to-svg    Convert OFD file(s) to per-page SVG files.
+  extract   Extract plain text from OFD file(s).
+  merge     Merge multiple OFD files into a single OFD.
+  sign      Sign an OFD file (GB/T 35275 SM2/SM3).
+  verify    Verify digital signatures on an OFD file.
+  encrypt   Encrypt an OFD file with a user password.
+  decrypt   Decrypt an OFD file with a user password.
+  validate  Apply or verify OFD integrity protection (GM/T 0099).
+```
 
 ## Features
 
-- `ofd to-png` — render OFD to PNG (single page or batch directory)
-- `ofd info` — show OFD metadata (pages, dimensions, signatures, attachments)
-- `ofd to-pdf` — export OFD to PDF
-- `ofd to-html` — export OFD to HTML
-- `ofd to-svg` — export OFD to SVG
-- `ofd extract` — extract text content
-- `ofd merge` — merge multiple OFD files
-- `ofd sign` — sign with digital signature
-- `ofd verify` — verify signature
-- `ofd encrypt` / `ofd decrypt` — password-protect OFD
-- `ofd validate` — check OFD-A compliance
+- **12 subcommands** covering the full OFD lifecycle: inspect, render,
+  extract, merge, sign, verify, encrypt, decrypt, integrity-protect.
+- **Single static binary** via GraalVM native-image (~54 MB, no JRE).
+- **AI-friendly**: standardized exit codes (0/1/2/3/4), `--json` global flag
+  on every subcommand for machine-readable output, logs to stderr, results
+  to stdout.
+- **Cross-platform** (macOS / Linux / Windows) — auto-discovers CJK fonts
+  from the host system.
+- **Two run modes**:
+  - **fat-jar** (`java -jar ofd-cli.jar`) — full feature set
+  - **native** (`./ofd`) — sub-second startup, no JRE
 
-## Installation
-
-Coming soon — for now build from source (see below).
+## Quick Start
 
 ```bash
-brew install ofdcli/tap/ofd            # macOS / Linux (planned)
-scoop install ofd                       # Windows (planned)
+# Native binary (no JRE required)
+./ofd info invoice.ofd
+./ofd to-png invoice.ofd -o out/
+./ofd to-pdf invoice.ofd -o out/invoice.pdf
+./ofd extract invoice.ofd -o out.txt
+
+# Fat-jar fallback (when native lacks a feature you need)
+java -jar target/ofd-cli.jar to-html invoice.ofd -o out/invoice.html
+
+# JSON for AI / pipelines
+./ofd info invoice.ofd --json
 ```
 
-Or download a single binary from [Releases](https://github.com/ofdcli/ofd-cli/releases).
+## Subcommand Reference
 
-## Usage
+### `version`
+Print version information (name, build time, git commit, Java/OS).
+
+### `info <file>`
+Show document metadata: page count, page dimensions, document info
+(title, author, dates, keywords), signature presence, attachment list.
 
 ```bash
-ofd --version
-ofd to-png invoice.ofd -o invoice.png
-ofd to-png invoices/ -o rendered/         # batch: directory in, directory out
-ofd to-png invoice.ofd -o out/ --ppm 10   # higher resolution
-ofd to-png invoice.ofd -o out/ --font-dir /opt/fonts
-ofd info invoice.ofd                      # (planned)
-ofd to-pdf invoice.ofd -o invoice.pdf     # (planned)
+ofd info invoice.ofd                 # human-readable
+ofd info invoice.ofd --json          # structured output
+ofd info ./ofd_folder/               # inspect first OFD in a directory
 ```
 
-### JSON output (for AI agents)
+### `to-png <file|dir> -o <out>`
+Render each page to a PNG file. Default resolution 7.56 px/mm ≈ 192 dpi.
 
 ```bash
-ofd --json to-png invoices/ -o out/        # full machine-readable report
+ofd to-png invoice.ofd -o out/
+ofd to-png ./ofd_folder/ -o ./png/ --ppm 10     # higher resolution
+ofd to-png invoice.ofd --font-dir /extra/fonts  # extra CJK fonts
+ofd to-png invoice.ofd --no-default-fonts       # skip system font scan
 ```
 
-Sample output:
-```json
-{"total":1,"ok":1,"failed":0,"elapsedMs":304,
- "outputDir":"/tmp/out",
- "results":[{"file":"invoice.ofd","status":"ok","pages":1,
-   "outputs":["invoice_p1.png"],"elapsedMs":300}]}
-```
-
-### Exit codes
-
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | Partial failure (one or more files failed in batch) |
-| 2 | Usage / argument error |
-| 3 | Internal error |
-| 4 | I/O error |
-
-### stdout vs stderr
-
-- **stdout** — result data (pipe-friendly)
-- **stderr** — progress logs and human-readable errors
-
-## Building from source
-
-Prerequisites:
-- JDK 11+ (Temurin, Zulu, GraalVM, or any distribution)
-- Maven 3.8+
-- For native-image: GraalVM JDK (any 21+)
+### `to-pdf <file> -o <out.pdf>`
+Convert to PDF (PDFBox 2.x, no AGPL entanglement).
 
 ```bash
-# Fat-jar (any JDK 11+)
-mvn package
-java -jar target/ofd-cli.jar to-png invoice.ofd -o out/
-
-# Native-image (GraalVM JDK)
-mvn -Pnative package
-./target/ofd to-png invoice.ofd -o out/
+ofd to-pdf invoice.ofd -o out/invoice.pdf
+ofd to-pdf invoice.ofd -o out/ --pages 1-3       # specific pages
 ```
 
-To get a GraalVM JDK:
+### `to-html <file> -o <out.html>`
+Render to HTML. Sibling `<out>.html-ofd-svg/` directory holds the
+per-page SVG assets referenced by the HTML.
+
 ```bash
-brew install --cask graalvm/tap/graalvm-ce-java17
-export JAVA_HOME=/opt/homebrew/opt/graalvm-ce-java17
+ofd to-html invoice.ofd -o out/invoice.html
+ofd to-html invoice.ofd -o out/ -w 1200          # custom viewport
 ```
 
-### How fonts work in native-image
+### `to-svg <file> -o <out-dir>`
+Per-page SVG files in `<out-dir>/<basename>/Page_1.svg` etc.
 
-The native binary has no AWT display server, so it can't enumerate system
-fonts via the JDK's `Font.createFont` path. Instead, on startup
-[`NativeImageFontBootstrap`](src/main/java/io/github/ofdcli/awt/NativeImageFontBootstrap.java):
+```bash
+ofd to-svg invoice.ofd -o svg_out/
+ofd to-svg invoice.ofd -o svg_out/ --ppm 10      # higher resolution
+```
 
-1. Scans `/System/Library/Fonts` (macOS) / `C:/Windows/Fonts` (Windows) /
-   `/usr/share/fonts` (Linux) directly from the filesystem.
-2. Validates each file with ofdrw's `TrueTypeFont` parser (no AWT).
-3. Registers every valid font under a wide set of CJK name aliases (宋体/黑体/楷体/SimSun/...).
-4. Reflectively replaces the `FontLoader` singleton with a pre-populated
-   instance, bypassing its broken AWT-based `init()`.
+### `extract <file>`
+Plain-text extraction. Uses `ContentExtractor` which walks the page
+tree and collects `TextObject` content. Note: OFDs that render text
+as vector paths (e.g. some Didi e-invoices) return empty text.
 
-This works on all three platforms without bundling fonts in the binary.
-On a regular JVM the bootstrap is a no-op.
+```bash
+ofd extract invoice.ofd                  # → stdout
+ofd extract invoice.ofd -o out.txt       # → file
+ofd extract ./ofd_folder/ -o ./text/     # batch
+ofd extract invoice.ofd --json           # structured per-page output
+ofd extract invoice.ofd --separator '---'   # custom page separator
+```
+
+### `merge <file>... -o <out.ofd>`
+Concatenate pages from multiple OFDs into a single OFD.
+
+```bash
+ofd merge a.ofd b.ofd c.ofd -o merged.ofd
+ofd merge ./ofd_folder/ -o merged.ofd
+```
+
+### `sign <file> -o <signed.ofd> -p12 <p12> -P <password>`
+Sign with GB/T 35275 SM2-with-SM3 via PKCS#12 keystore.
+
+```bash
+ofd sign input.ofd -p12 USER.p12 -P 777777 --alias private -o signed.ofd
+```
+
+### `verify <file>`
+Verify digital signature (GB/T 35275). Returns:
+- exit 0 + `VALID` if signature is valid
+- exit 0 + `UNSIGNED` if file has no signatures
+- exit 1 + `INVALID` if signature failed verification
+
+```bash
+ofd verify signed.ofd
+ofd verify signed.ofd --json
+```
+
+### `encrypt <file> -o <out> -u <user> -P <password>`
+Encrypt with a user password (OFD-encrypted container is a valid OFD).
+
+```bash
+ofd encrypt input.ofd -o encrypted.ofd -u alice -P s3cret
+ofd encrypt input.ofd -o encrypted.ofd -u alice -P s3cret -t 1   # owner type
+```
+
+### `decrypt <file> -o <out> -P <password>`
+Decrypt a previously encrypted OFD.
+
+```bash
+ofd decrypt encrypted.ofd -o plain.ofd -u alice -P s3cret
+ofd decrypt encrypted.ofd -o plain.ofd -P s3cret    # password only
+```
+
+### `validate <file>`
+Apply or verify OFD integrity protection (GM/T 0099 7.4.6).
+
+```bash
+# Verify integrity
+ofd validate signed.ofd
+ofd validate signed.ofd --json
+
+# Apply integrity protection (requires PKCS#12)
+ofd validate input.ofd -o protected.ofd --apply \
+  -p12 USER.p12 -P 777777 --alias private
+```
+
+## Exit Codes
+
+| Code | Meaning           | Example                              |
+|------|-------------------|--------------------------------------|
+| 0    | OK                | All inputs processed successfully    |
+| 1    | PARTIAL_FAILURE   | Batch run had some failures          |
+| 2    | USAGE_ERROR       | Missing or invalid arguments         |
+| 3    | INTERNAL_ERROR    | Unexpected exception                |
+| 4    | IO_ERROR          | File not found / not readable        |
+
+## Build from Source
+
+Requires JDK 11+ and Maven 3.9+.
+
+```bash
+# fat-jar (always works, full feature set)
+mvn -DskipTests package
+java -jar target/ofd-cli.jar --version
+
+# native binary (one-time setup of GraalVM is required)
+brew install --cask graalvm/tap/graalvm-jdk           # or download manually
+export JAVA_HOME=/path/to/graalvm
+mvn -Pnative -DskipTests clean package
+./target/ofd --version
+```
+
+### Native-image limitations
+
+The native binary supports `info`, `to-png`, `extract`, `merge`,
+`encrypt`, `decrypt`, and `version` out of the box. Three subcommands
+have constraints due to AWT / BouncyCastle integration on the
+available GraalVM 25.0.4 toolchain:
+
+| Subcommand          | Native status          | Workaround                              |
+|---------------------|------------------------|-----------------------------------------|
+| `sign` / `verify`   | limited*               | use fat-jar (BC provider registration)  |
+| `validate --apply`  | limited*               | use fat-jar                             |
+| `to-pdf`            | limited**              | use fat-jar (PDFBox reflection)         |
+| `to-html`           | limited***             | use fat-jar (AWT CFontManager)          |
+| `to-svg`            | limited***             | use fat-jar                             |
+
+*\* BouncyCastleProvider needs build-time registration; the
+auto-registration trick via static initializer works on the JVM but
+isn't recognized by the substrate VM's "registered at build time" check.
+\*\** PDFBox uses reflection not captured by the native-image-agent
+in our training run.
+\*** `HtmlMaker` / `SVGExporter` derive from `AWTMaker` and trigger
+`sun/font/CFontManager` JNI lookups that aren't resolvable without
+a full macOS JRE.
+
+For these features, use the fat-jar:
+
+```bash
+java -jar target/ofd-cli.jar to-html invoice.ofd -o out.html
+```
+
+## Font Setup
+
+`to-png` / `to-pdf` / `to-html` / `to-svg` need CJK fonts (Song, Kai,
+Hei) which the standard OFD issuer references. On **macOS / Linux /
+Windows** the CLI auto-scans the system font directories:
+
+- macOS: `/System/Library/Fonts`, `/System/Library/Fonts/Supplemental`,
+  `~/Library/Fonts`
+- Linux: `/usr/share/fonts`, `/usr/local/share/fonts`, `~/.fonts`
+- Windows: `C:/Windows/Fonts`
+
+Override with `--font-dir /path/to/fonts` (repeatable) or
+`--no-default-fonts` to skip the system scan.
+
+On **native-image**, AWT cannot enumerate fonts so we pre-populate the
+`FontLoader` singleton by scanning the filesystem directly and
+registering each valid font under 30+ CJK aliases (宋体, SimSun,
+黑体, KaiTi, …). See `io.github.ofdcli.awt.NativeImageFontBootstrap`.
+
+## Testing
+
+Two test layers:
+
+```bash
+# Unit tests (JUnit 5, fast)
+mvn -o test
+
+# Integration tests (39 cases, both fat-jar and native)
+./src/test/scripts/run-tests.sh -m jar
+./src/test/scripts/run-tests.sh -m native
+```
+
+Test fixtures are copied from the ofdrw project's `target/test-classes/`
+(see `src/test/resources/`). The PKCS#12 keystore `USER.p12` has
+alias `private` and password `777777`.
 
 ## License
 
-Apache 2.0
+Apache 2.0. Bundled third-party components: see the per-jar NOTICE files
+in `target/ofd-cli.jar`.
