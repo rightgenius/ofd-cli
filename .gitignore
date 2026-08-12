@@ -1,0 +1,44 @@
+# Build output
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+
+# Native image artifacts
+ofd
+ofd.exe
+ofd-cli
+ofd-cli.exe
+*.so
+*.dylib
+*.dll
+
+# Logs
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Test artifacts
+test-output/
+test-data/*.ofd
+test-data/*.png
+test-data/*.pdf
