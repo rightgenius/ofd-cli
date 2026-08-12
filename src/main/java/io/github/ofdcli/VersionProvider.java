@@ -5,6 +5,11 @@ import picocli.CommandLine;
 import java.util.concurrent.Callable;
 
 public class VersionProvider implements CommandLine.IVersionProvider {
+
+    // Required by picocli's reflection-based instantiation under GraalVM native-image.
+    public VersionProvider() {
+    }
+
     @Override
     public String[] getVersion() {
         return new String[] {
