@@ -7,10 +7,10 @@ out/
 *.war
 
 # Native image artifacts
-ofd
-ofd.exe
-ofd-cli
-ofd-cli.exe
+/ofd
+/ofd.exe
+target/ofd
+target/ofd.exe
 *.so
 *.dylib
 *.dll

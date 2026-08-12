@@ -1,5 +1,7 @@
 package io.github.ofdcli;
 
+import io.github.ofdcli.awt.NativeImageFontBootstrap;
+import io.github.ofdcli.cmd.ToPngCommand;
 import io.github.ofdcli.cmd.VersionCommand;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -11,8 +13,8 @@ import picocli.CommandLine.Option;
         versionProvider = VersionProvider.class,
         subcommands = {
                 VersionCommand.class,
+                ToPngCommand.class,
                 // InfoCommand.class,        // v0.2
-                // ToPngCommand.class,       // v0.2
                 // ToPdfCommand.class,       // v0.2
                 // ExtractCommand.class,     // v0.2
                 // ToHtmlCommand.class,      // v0.3
@@ -33,6 +35,15 @@ public class Main implements Runnable {
     boolean json;
 
     public static void main(String[] args) {
+        // Force headless BEFORE any AWT subsystem initializes — native-image
+        // can't open a graphics device and would otherwise try OpenGL/CGL.
+        if (System.getProperty("java.awt.headless") == null) {
+            System.setProperty("java.awt.headless", "true");
+        }
+        // Native-image: AWT FontManager cannot enumerate host system fonts, so
+        // FontLoader.init() ends up with an empty font table and throws
+        // "系统中无可用字体". Pre-populate it via reflection (no AWT needed).
+        NativeImageFontBootstrap.bootstrap();
         int exitCode = new CommandLine(new Main())
                 .setExecutionExceptionHandler((ex, cmd, parseResult) -> {
                     // Print error to stderr; picocli default already does this, but keep deterministic.

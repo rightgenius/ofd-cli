@@ -6,23 +6,28 @@ Built on top of [ofdrw](https://github.com/ofdrw/ofdrw) (Apache 2.0). Single bin
 
 ## Status
 
-🚧 **0.1.0-SNAPSHOT — scaffolding only**
+🚧 **0.2.0-SNAPSHOT — `version` + `to-png` working, native-image PoC validated**
 
-This is the very first commit. Only `ofd version` works so far; subcommands land in v0.2+.
+Both the fat-jar (JVM) and the GraalVM native-image build render Chinese OFD
+invoices (滴滴电子发票 etc.) to PNG correctly. Native binary is ~38MB,
+zero JRE dependency, cold-starts in ~25ms.
 
-## Roadmap
+## Subcommands
 
-| Version | Subcommands | Notes |
-|---------|-------------|-------|
-| 0.1.0 | `version` | GraalVM native-image pipeline validated |
-| 0.2.0 | `info` `to-png` `to-pdf` `extract` | core read + render |
-| 0.3.0 | `to-html` `to-svg` `merge` | more formats + composite |
-| 0.4.0 | `sign` `verify` `encrypt` `decrypt` `validate` | crypto + OFD-A |
+| Command | Status | Description |
+|---------|--------|-------------|
+| `ofd version` | ✅ | Print tool / JVM / OS info (human or `--json`) |
+| `ofd to-png` | ✅ | Render OFD page(s) to PNG, batch directory supported |
+| `ofd info` | 🔜 v0.2 | Show OFD metadata (pages, dimensions, signatures, attachments) |
+| `ofd to-pdf` | 🔜 v0.2 | Export OFD to PDF |
+| `ofd extract` | 🔜 v0.2 | Extract text content |
+| `ofd to-html` / `to-svg` / `merge` | 🔜 v0.3 | more formats + composite |
+| `ofd sign` / `verify` / `encrypt` / `decrypt` / `validate` | 🔜 v0.4 | crypto + OFD-A |
 
-## Features (planned)
+## Features
 
+- `ofd to-png` — render OFD to PNG (single page or batch directory)
 - `ofd info` — show OFD metadata (pages, dimensions, signatures, attachments)
-- `ofd to-png` — render OFD to PNG (single page or batch)
 - `ofd to-pdf` — export OFD to PDF
 - `ofd to-html` — export OFD to HTML
 - `ofd to-svg` — export OFD to SVG
@@ -33,30 +38,41 @@ This is the very first commit. Only `ofd version` works so far; subcommands land
 - `ofd encrypt` / `ofd decrypt` — password-protect OFD
 - `ofd validate` — check OFD-A compliance
 
-## Installation (planned)
+## Installation
+
+Coming soon — for now build from source (see below).
 
 ```bash
-brew install ofdcli/tap/ofd            # macOS / Linux
-scoop install ofd                       # Windows
+brew install ofdcli/tap/ofd            # macOS / Linux (planned)
+scoop install ofd                       # Windows (planned)
 ```
 
 Or download a single binary from [Releases](https://github.com/ofdcli/ofd-cli/releases).
 
-## Usage (planned)
+## Usage
 
 ```bash
 ofd --version
-ofd info invoice.ofd
 ofd to-png invoice.ofd -o invoice.png
 ofd to-png invoices/ -o rendered/         # batch: directory in, directory out
-ofd extract invoice.ofd
-ofd to-pdf invoice.ofd -o invoice.pdf
+ofd to-png invoice.ofd -o out/ --ppm 10   # higher resolution
+ofd to-png invoice.ofd -o out/ --font-dir /opt/fonts
+ofd info invoice.ofd                      # (planned)
+ofd to-pdf invoice.ofd -o invoice.pdf     # (planned)
 ```
 
 ### JSON output (for AI agents)
 
 ```bash
-ofd info invoice.ofd --json
+ofd --json to-png invoices/ -o out/        # full machine-readable report
+```
+
+Sample output:
+```json
+{"total":1,"ok":1,"failed":0,"elapsedMs":304,
+ "outputDir":"/tmp/out",
+ "results":[{"file":"invoice.ofd","status":"ok","pages":1,
+   "outputs":["invoice_p1.png"],"elapsedMs":300}]}
 ```
 
 ### Exit codes
@@ -73,20 +89,22 @@ ofd info invoice.ofd --json
 
 - **stdout** — result data (pipe-friendly)
 - **stderr** — progress logs and human-readable errors
-- All log lines are prefixed so they can be filtered with `2>logs.txt`
 
 ## Building from source
 
 Prerequisites:
 - JDK 11+ (Temurin, Zulu, GraalVM, or any distribution)
 - Maven 3.8+
+- For native-image: GraalVM JDK (any 21+)
 
 ```bash
-mvn package                              # build fat-jar: target/ofd-cli.jar
-java -jar target/ofd-cli.jar version     # run via fat-jar
+# Fat-jar (any JDK 11+)
+mvn package
+java -jar target/ofd-cli.jar to-png invoice.ofd -o out/
 
-mvn -Pnative package                     # build native image (needs GraalVM JDK)
-./target/ofd version                     # run native binary
+# Native-image (GraalVM JDK)
+mvn -Pnative package
+./target/ofd to-png invoice.ofd -o out/
 ```
 
 To get a GraalVM JDK:
@@ -94,6 +112,22 @@ To get a GraalVM JDK:
 brew install --cask graalvm/tap/graalvm-ce-java17
 export JAVA_HOME=/opt/homebrew/opt/graalvm-ce-java17
 ```
+
+### How fonts work in native-image
+
+The native binary has no AWT display server, so it can't enumerate system
+fonts via the JDK's `Font.createFont` path. Instead, on startup
+[`NativeImageFontBootstrap`](src/main/java/io/github/ofdcli/awt/NativeImageFontBootstrap.java):
+
+1. Scans `/System/Library/Fonts` (macOS) / `C:/Windows/Fonts` (Windows) /
+   `/usr/share/fonts` (Linux) directly from the filesystem.
+2. Validates each file with ofdrw's `TrueTypeFont` parser (no AWT).
+3. Registers every valid font under a wide set of CJK name aliases (宋体/黑体/楷体/SimSun/...).
+4. Reflectively replaces the `FontLoader` singleton with a pre-populated
+   instance, bypassing its broken AWT-based `init()`.
+
+This works on all three platforms without bundling fonts in the binary.
+On a regular JVM the bootstrap is a no-op.
 
 ## License
 

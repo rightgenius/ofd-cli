@@ -1,0 +1,23 @@
+[
+  {
+    "name": "org.ofdrw.converter.FontLoader",
+    "fields": [
+      {"name": "fontNamePathMapping"},
+      {"name": "fontNameAliasMapping"},
+      {"name": "similarFontReplaceRegexMapping"},
+      {"name": "defaultFont"},
+      {"name": "iTextDefaultFont"},
+      {"name": "DefaultFontPath"},
+      {"name": "instance"}
+    ]
+  },
+  {
+    "name": "org.ofdrw.converter.FontLoader",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.ofdrw.converter.font.TrueTypeFont",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  }
+]
