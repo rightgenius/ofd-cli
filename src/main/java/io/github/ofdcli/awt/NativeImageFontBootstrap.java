@@ -94,6 +94,12 @@ public final class NativeImageFontBootstrap {
                     if (!(name.endsWith(".ttf") || name.endsWith(".otf") || name.endsWith(".ttc"))) {
                         continue;
                     }
+                    // Skip pathologically large files — no real font is > 50MB.
+                    // /System/Library/Fonts has .package and .ttc files that
+                    // are actually 200MB+ on some macOS releases.
+                    long size;
+                    try { size = Files.size(p); } catch (IOException e) { continue; }
+                    if (size > 50L * 1024 * 1024) continue;
                     byte[] buf;
                     TrueTypeFont ttf;
                     try {

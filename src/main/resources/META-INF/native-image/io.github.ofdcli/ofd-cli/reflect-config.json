@@ -1,23 +1,2751 @@
 [
   {
-    "name": "org.ofdrw.converter.FontLoader",
-    "fields": [
-      {"name": "fontNamePathMapping"},
-      {"name": "fontNameAliasMapping"},
-      {"name": "similarFontReplaceRegexMapping"},
-      {"name": "defaultFont"},
-      {"name": "iTextDefaultFont"},
-      {"name": "DefaultFontPath"},
-      {"name": "instance"}
+    "name": "apple.security.AppleProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
     ]
   },
   {
-    "name": "org.ofdrw.converter.FontLoader",
-    "allDeclaredConstructors": true
+    "name": "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
   },
   {
-    "name": "org.ofdrw.converter.font.TrueTypeFont",
+    "name": "com.twelvemonkeys.imageio.color.ProfileDeferralActivator$Spi"
+  },
+  {
+    "name": "com.twelvemonkeys.imageio.plugins.tiff.BigTIFFImageReaderSpi"
+  },
+  {
+    "name": "com.twelvemonkeys.imageio.plugins.tiff.BigTIFFImageWriterSpi"
+  },
+  {
+    "name": "com.twelvemonkeys.imageio.plugins.tiff.TIFFImageReaderSpi"
+  },
+  {
+    "name": "com.twelvemonkeys.imageio.plugins.tiff.TIFFImageWriterSpi"
+  },
+  {
+    "name": "com.twelvemonkeys.imageio.stream.BufferedFileImageInputStreamSpi"
+  },
+  {
+    "name": "com.twelvemonkeys.imageio.stream.BufferedInputStreamImageInputStreamSpi"
+  },
+  {
+    "name": "com.twelvemonkeys.imageio.stream.BufferedRAFImageInputStreamSpi"
+  },
+  {
+    "name": "groovy.lang.Closure"
+  },
+  {
+    "name": "io.github.ofdcli.Main",
+    "fields": [
+      {
+        "name": "json"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.VersionProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.DecryptCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "input"
+      },
+      {
+        "name": "output"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "password"
+      },
+      {
+        "name": "user"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.EncryptCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "input"
+      },
+      {
+        "name": "output"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "password"
+      },
+      {
+        "name": "user"
+      },
+      {
+        "name": "userType"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.ExtractCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "input"
+      },
+      {
+        "name": "output"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "separator"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.InfoCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "input"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "showAttachments"
+      },
+      {
+        "name": "showPages"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.MergeCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "inputs"
+      },
+      {
+        "name": "output"
+      },
+      {
+        "name": "parent"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.SignCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "alias"
+      },
+      {
+        "name": "input"
+      },
+      {
+        "name": "output"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "password"
+      },
+      {
+        "name": "pkcs12"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.ToHtmlCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "extraFontDirs"
+      },
+      {
+        "name": "input"
+      },
+      {
+        "name": "noDefaultFonts"
+      },
+      {
+        "name": "output"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "screenWidth"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.ToPdfCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "extraFontDirs"
+      },
+      {
+        "name": "input"
+      },
+      {
+        "name": "noDefaultFonts"
+      },
+      {
+        "name": "output"
+      },
+      {
+        "name": "pages"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "ppm"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.ToPngCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "extraFontDirs"
+      },
+      {
+        "name": "input"
+      },
+      {
+        "name": "noDefaultFonts"
+      },
+      {
+        "name": "outputDir"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "ppm"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.ToSvgCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "extraFontDirs"
+      },
+      {
+        "name": "input"
+      },
+      {
+        "name": "noDefaultFonts"
+      },
+      {
+        "name": "outputDir"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "ppm"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.ValidateCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "alias"
+      },
+      {
+        "name": "apply"
+      },
+      {
+        "name": "input"
+      },
+      {
+        "name": "output"
+      },
+      {
+        "name": "parent"
+      },
+      {
+        "name": "password"
+      },
+      {
+        "name": "pkcs12"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.VerifyCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "input"
+      },
+      {
+        "name": "parent"
+      }
+    ]
+  },
+  {
+    "name": "io.github.ofdcli.cmd.VersionCommand",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "parent"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.AlphaComposite",
+    "fields": [
+      {
+        "name": "extraAlpha"
+      },
+      {
+        "name": "rule"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.Color",
+    "methods": [
+      {
+        "name": "getRGB",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.awt.geom.AffineTransform",
+    "fields": [
+      {
+        "name": "m00"
+      },
+      {
+        "name": "m01"
+      },
+      {
+        "name": "m02"
+      },
+      {
+        "name": "m10"
+      },
+      {
+        "name": "m11"
+      },
+      {
+        "name": "m12"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.geom.GeneralPath",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "int",
+          "byte[]",
+          "int",
+          "float[]",
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.awt.geom.Path2D",
+    "fields": [
+      {
+        "name": "numTypes"
+      },
+      {
+        "name": "pointTypes"
+      },
+      {
+        "name": "windingRule"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.geom.Path2D$Float",
+    "fields": [
+      {
+        "name": "floatCoords"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.geom.Point2D$Float",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "float",
+          "float"
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "x"
+      },
+      {
+        "name": "y"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.geom.Rectangle2D$Float",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "float",
+          "float",
+          "float",
+          "float"
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "height"
+      },
+      {
+        "name": "width"
+      },
+      {
+        "name": "x"
+      },
+      {
+        "name": "y"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.image.BufferedImage",
+    "methods": [
+      {
+        "name": "getRGB",
+        "parameterTypes": [
+          "int",
+          "int",
+          "int",
+          "int",
+          "int[]",
+          "int",
+          "int"
+        ]
+      },
+      {
+        "name": "setRGB",
+        "parameterTypes": [
+          "int",
+          "int",
+          "int",
+          "int",
+          "int[]",
+          "int",
+          "int"
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "colorModel"
+      },
+      {
+        "name": "imageType"
+      },
+      {
+        "name": "raster"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.image.ColorConvertOp"
+  },
+  {
+    "name": "java.awt.image.ColorModel",
+    "methods": [
+      {
+        "name": "getRGBdefault",
+        "parameterTypes": []
+      }
+    ],
+    "fields": [
+      {
+        "name": "colorSpace"
+      },
+      {
+        "name": "colorSpaceType"
+      },
+      {
+        "name": "isAlphaPremultiplied"
+      },
+      {
+        "name": "is_sRGB"
+      },
+      {
+        "name": "nBits"
+      },
+      {
+        "name": "numComponents"
+      },
+      {
+        "name": "supportsAlpha"
+      },
+      {
+        "name": "transparency"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.image.IndexColorModel",
+    "fields": [
+      {
+        "name": "allgrayopaque"
+      },
+      {
+        "name": "colorData"
+      },
+      {
+        "name": "map_size"
+      },
+      {
+        "name": "rgb"
+      },
+      {
+        "name": "transparent_index"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.image.Raster",
+    "fields": [
+      {
+        "name": "dataBuffer"
+      },
+      {
+        "name": "height"
+      },
+      {
+        "name": "minX"
+      },
+      {
+        "name": "minY"
+      },
+      {
+        "name": "numBands"
+      },
+      {
+        "name": "numDataElements"
+      },
+      {
+        "name": "sampleModel"
+      },
+      {
+        "name": "sampleModelTranslateX"
+      },
+      {
+        "name": "sampleModelTranslateY"
+      },
+      {
+        "name": "width"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.image.SampleModel",
+    "methods": [
+      {
+        "name": "getPixels",
+        "parameterTypes": [
+          "int",
+          "int",
+          "int",
+          "int",
+          "int[]",
+          "java.awt.image.DataBuffer"
+        ]
+      },
+      {
+        "name": "setPixels",
+        "parameterTypes": [
+          "int",
+          "int",
+          "int",
+          "int",
+          "int[]",
+          "java.awt.image.DataBuffer"
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "height"
+      },
+      {
+        "name": "width"
+      }
+    ]
+  },
+  {
+    "name": "java.awt.image.SinglePixelPackedSampleModel",
+    "fields": [
+      {
+        "name": "bitMasks"
+      },
+      {
+        "name": "bitOffsets"
+      },
+      {
+        "name": "bitSizes"
+      },
+      {
+        "name": "maxBitSize"
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Boolean",
+    "methods": [
+      {
+        "name": "getBoolean",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Object"
+  },
+  {
+    "name": "java.lang.String"
+  },
+  {
+    "name": "java.lang.System",
+    "methods": [
+      {
+        "name": "getProperty",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "load",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.nio.file.Path"
+  },
+  {
+    "name": "java.nio.file.Paths",
+    "methods": [
+      {
+        "name": "get",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String[]"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.security.KeyStoreSpi"
+  },
+  {
+    "name": "java.security.MessageDigestSpi"
+  },
+  {
+    "name": "java.security.cert.PKIXRevocationChecker"
+  },
+  {
+    "name": "java.sql.Connection"
+  },
+  {
+    "name": "java.sql.Driver"
+  },
+  {
+    "name": "java.sql.DriverManager"
+  },
+  {
+    "name": "java.sql.Time"
+  },
+  {
+    "name": "java.sql.Timestamp"
+  },
+  {
+    "name": "java.time.Duration"
+  },
+  {
+    "name": "java.time.Instant"
+  },
+  {
+    "name": "java.time.LocalDate"
+  },
+  {
+    "name": "java.time.LocalDateTime"
+  },
+  {
+    "name": "java.time.LocalTime"
+  },
+  {
+    "name": "java.time.MonthDay"
+  },
+  {
+    "name": "java.time.OffsetDateTime"
+  },
+  {
+    "name": "java.time.OffsetTime"
+  },
+  {
+    "name": "java.time.Period"
+  },
+  {
+    "name": "java.time.Year"
+  },
+  {
+    "name": "java.time.YearMonth"
+  },
+  {
+    "name": "java.time.ZoneId"
+  },
+  {
+    "name": "java.time.ZoneOffset"
+  },
+  {
+    "name": "java.time.ZonedDateTime"
+  },
+  {
+    "name": "javax.crypto.spec.GCMParameterSpec"
+  },
+  {
+    "name": "javax.imageio.spi.ImageReaderSpi"
+  },
+  {
+    "name": "javax.imageio.spi.ImageWriterSpi"
+  },
+  {
+    "name": "org.apache.commons.logging.LogFactory"
+  },
+  {
+    "name": "org.apache.commons.logging.impl.Jdk14Logger",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.commons.logging.impl.Log4JLogger"
+  },
+  {
+    "name": "org.apache.commons.logging.impl.LogFactoryImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.commons.logging.impl.WeakHashtable",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.pdfbox.jbig2.JBIG2ImageReaderSpi"
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.COMPOSITE$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.CONTEXT$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.CompositeSignatures$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.DH$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.DSA$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.DSTU4145$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.Dilithium$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.EC$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ECGOST$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.EXTERNAL$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.EdEC$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ElGamal$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.Falcon$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.GM$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.GOST$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.IES$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.LMS$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.MLDSA$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.MLKEM$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.NTRU$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.NoSig$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.RSA$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.SLHDSA$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.SPHINCSPlus$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.X509$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ec.GMSignatureSpi$sm3WithSM2",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.Blake2b$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.Blake2s$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.Blake3$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.DSTU7564$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.GOST3411$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.Haraka$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.Keccak$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.MD2$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.MD4$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.MD5$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.RIPEMD128$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.RIPEMD160$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.RIPEMD256$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.RIPEMD320$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SHA1$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SHA1$SHA1Mac",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SHA224$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SHA256$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SHA3$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SHA384$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SHA512$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SM3$Digest",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SM3$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.Skein$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.Tiger$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.Whirlpool$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.drbg.DRBG$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.kdf.HKDF$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.kdf.PBKDF2$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.kdf.SCRYPT$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.keystore.BC$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.keystore.BCFKS$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.keystore.PKCS12$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.keystore.pkcs12.PKCS12KeyStoreSpi$BCPKCS12KeyStore",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.AES$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.ARC4$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.ARIA$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Blowfish$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.CAST5$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.CAST6$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Camellia$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.ChaCha$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.DES$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.DESede$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.DESede$PBEWithSHAAndDES3Key",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.DSTU7624$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.GOST28147$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.GOST3412_2015$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Grain128$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Grainv1$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.HC128$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.HC256$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.HKDF$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.IDEA$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Noekeon$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.OpenSSLPBKDF$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.PBEPBKDF1$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.PBEPBKDF2$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.PBEPKCS12$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Poly1305$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.RC2$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.RC2$PBEWithSHAAnd40BitRC2",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.RC5$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.RC6$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Rijndael$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.SCRYPT$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.SEED$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.SM4$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Salsa20$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Serpent$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Shacal2$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.SipHash$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.SipHash128$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Skipjack$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.TEA$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.TLSKDF$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Threefish$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Twofish$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.VMPC$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.VMPCKSA3$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.XSalsa20$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.XTEA$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.Zuc$Mappings",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.dom4j.DocumentFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.dom4j.tree.QNameCache",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.dom4j.util.SimpleSingleton",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.jaxen.saxpath.XPathReader"
+  },
+  {
+    "name": "org.jaxen.saxpath.base.XPathReader",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.jaxen.saxpath.helpers.XPathReaderFactory"
+  },
+  {
+    "name": "org.ujmp.ejml.Plugin"
+  },
+  {
+    "name": "org.ujmp.jblas.Plugin"
+  },
+  {
+    "name": "org.ujmp.mtj.Plugin"
+  },
+  {
+    "name": "org.ujmp.ojalgo.Plugin"
+  },
+  {
+    "name": "org.ujmp.parallelcolt.Plugin"
+  },
+  {
+    "name": "picocli.CommandLine$AutoHelpMixin",
+    "fields": [
+      {
+        "name": "helpRequested"
+      },
+      {
+        "name": "versionRequested"
+      }
+    ]
+  },
+  {
+    "name": "sun.awt.SunHints",
+    "fields": [
+      {
+        "name": "INTVAL_STROKE_PURE"
+      }
+    ]
+  },
+  {
+    "name": "sun.awt.image.BufImgSurfaceData$ICMColorData",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long"
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "pData"
+      }
+    ]
+  },
+  {
+    "name": "sun.awt.image.IntegerComponentRaster",
+    "fields": [
+      {
+        "name": "data"
+      },
+      {
+        "name": "dataOffsets"
+      },
+      {
+        "name": "pixelStride"
+      },
+      {
+        "name": "scanlineStride"
+      },
+      {
+        "name": "type"
+      }
+    ]
+  },
+  {
+    "name": "sun.font.CFontManager",
+    "methods": [
+      {
+        "name": "registerFont",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.font.CharToGlyphMapper",
+    "methods": [
+      {
+        "name": "charToGlyph",
+        "parameterTypes": [
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.font.Font2D",
+    "methods": [
+      {
+        "name": "canDisplay",
+        "parameterTypes": [
+          "char"
+        ]
+      },
+      {
+        "name": "charToGlyphRaw",
+        "parameterTypes": [
+          "int"
+        ]
+      },
+      {
+        "name": "charToVariationGlyphRaw",
+        "parameterTypes": [
+          "int",
+          "int"
+        ]
+      },
+      {
+        "name": "getMapper",
+        "parameterTypes": []
+      },
+      {
+        "name": "getTableBytes",
+        "parameterTypes": [
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.font.FontStrike",
+    "methods": [
+      {
+        "name": "getGlyphMetrics",
+        "parameterTypes": [
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.font.GlyphList",
+    "fields": [
+      {
+        "name": "gposx"
+      },
+      {
+        "name": "gposy"
+      },
+      {
+        "name": "images"
+      },
+      {
+        "name": "lcdRGBOrder"
+      },
+      {
+        "name": "lcdSubPixPos"
+      },
+      {
+        "name": "len"
+      },
+      {
+        "name": "positions"
+      },
+      {
+        "name": "usePositions"
+      }
+    ]
+  },
+  {
+    "name": "sun.font.PhysicalStrike",
+    "methods": [
+      {
+        "name": "adjustPoint",
+        "parameterTypes": [
+          "java.awt.geom.Point2D$Float"
+        ]
+      },
+      {
+        "name": "getGlyphPoint",
+        "parameterTypes": [
+          "int",
+          "int"
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "pScalerContext"
+      }
+    ]
+  },
+  {
+    "name": "sun.font.StrikeMetrics",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "float",
+          "float",
+          "float",
+          "float",
+          "float",
+          "float",
+          "float",
+          "float",
+          "float",
+          "float"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.font.TrueTypeFont",
+    "methods": [
+      {
+        "name": "readBlock",
+        "parameterTypes": [
+          "java.nio.ByteBuffer",
+          "int",
+          "int"
+        ]
+      },
+      {
+        "name": "readBytes",
+        "parameterTypes": [
+          "int",
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.font.Type1Font",
+    "methods": [
+      {
+        "name": "readFile",
+        "parameterTypes": [
+          "java.nio.ByteBuffer"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.Disposer",
+    "methods": [
+      {
+        "name": "addRecord",
+        "parameterTypes": [
+          "java.lang.Object",
+          "long",
+          "long"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.InvalidPipeException"
+  },
+  {
+    "name": "sun.java2d.NullSurfaceData"
+  },
+  {
+    "name": "sun.java2d.SunGraphics2D",
+    "fields": [
+      {
+        "name": "clipRegion"
+      },
+      {
+        "name": "composite"
+      },
+      {
+        "name": "eargb"
+      },
+      {
+        "name": "lcdTextContrast"
+      },
+      {
+        "name": "pixel"
+      },
+      {
+        "name": "strokeHint"
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.SurfaceData",
+    "fields": [
+      {
+        "name": "pData"
+      },
+      {
+        "name": "valid"
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.Blit",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.BlitBg",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.CompositeType",
+    "fields": [
+      {
+        "name": "AnyAlpha"
+      },
+      {
+        "name": "Src"
+      },
+      {
+        "name": "SrcNoEa"
+      },
+      {
+        "name": "SrcOver"
+      },
+      {
+        "name": "SrcOverNoEa"
+      },
+      {
+        "name": "Xor"
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.DrawGlyphList",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.DrawGlyphListAA",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.DrawGlyphListLCD",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.DrawLine",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.DrawParallelogram",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.DrawPath",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.DrawPolygons",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.DrawRect",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.FillParallelogram",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.FillPath",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.FillRect",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.FillSpans",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.GraphicsPrimitive",
+    "fields": [
+      {
+        "name": "pNativePrim"
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.GraphicsPrimitiveMgr",
+    "methods": [
+      {
+        "name": "register",
+        "parameterTypes": [
+          "sun.java2d.loops.GraphicsPrimitive[]"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.GraphicsPrimitive[]"
+  },
+  {
+    "name": "sun.java2d.loops.MaskBlit",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.MaskFill",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.ScaledBlit",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.SurfaceType",
+    "fields": [
+      {
+        "name": "Any3Byte"
+      },
+      {
+        "name": "Any4Byte"
+      },
+      {
+        "name": "AnyByte"
+      },
+      {
+        "name": "AnyColor"
+      },
+      {
+        "name": "AnyInt"
+      },
+      {
+        "name": "AnyShort"
+      },
+      {
+        "name": "ByteBinary1Bit"
+      },
+      {
+        "name": "ByteBinary2Bit"
+      },
+      {
+        "name": "ByteBinary4Bit"
+      },
+      {
+        "name": "ByteGray"
+      },
+      {
+        "name": "ByteIndexed"
+      },
+      {
+        "name": "ByteIndexedBm"
+      },
+      {
+        "name": "FourByteAbgr"
+      },
+      {
+        "name": "FourByteAbgrPre"
+      },
+      {
+        "name": "Index12Gray"
+      },
+      {
+        "name": "Index8Gray"
+      },
+      {
+        "name": "IntArgb"
+      },
+      {
+        "name": "IntArgbBm"
+      },
+      {
+        "name": "IntArgbPre"
+      },
+      {
+        "name": "IntBgr"
+      },
+      {
+        "name": "IntRgb"
+      },
+      {
+        "name": "IntRgbx"
+      },
+      {
+        "name": "OpaqueColor"
+      },
+      {
+        "name": "ThreeByteBgr"
+      },
+      {
+        "name": "Ushort4444Argb"
+      },
+      {
+        "name": "Ushort555Rgb"
+      },
+      {
+        "name": "Ushort555Rgbx"
+      },
+      {
+        "name": "Ushort565Rgb"
+      },
+      {
+        "name": "UshortGray"
+      },
+      {
+        "name": "UshortIndexed"
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.TransformHelper",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "long",
+          "sun.java2d.loops.SurfaceType",
+          "sun.java2d.loops.CompositeType",
+          "sun.java2d.loops.SurfaceType"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.loops.XORComposite",
+    "fields": [
+      {
+        "name": "alphaMask"
+      },
+      {
+        "name": "xorColor"
+      },
+      {
+        "name": "xorPixel"
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.marlin.DMarlinRenderingEngine",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.pipe.Region",
+    "fields": [
+      {
+        "name": "bands"
+      },
+      {
+        "name": "endIndex"
+      },
+      {
+        "name": "hix"
+      },
+      {
+        "name": "hiy"
+      },
+      {
+        "name": "lox"
+      },
+      {
+        "name": "loy"
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.pipe.RegionIterator",
+    "fields": [
+      {
+        "name": "curIndex"
+      },
+      {
+        "name": "numXbands"
+      },
+      {
+        "name": "region"
+      }
+    ]
+  },
+  {
+    "name": "sun.java2d.pipe.ShapeSpanIterator",
+    "fields": [
+      {
+        "name": "pData"
+      }
+    ]
+  },
+  {
+    "name": "sun.lwawt.macosx.LWCToolkit",
+    "methods": [
+      {
+        "name": "installToolkitThreadInJava",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "sun.net.www.protocol.http.Handler",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "sun.security.provider.MD5",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "sun.security.provider.NativePRNG",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.security.SecureRandomParameters"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sun.security.provider.SHA",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "sun.text.resources.cldr.FormatData"
+  },
+  {
+    "name": "sun.text.resources.cldr.FormatData_en"
+  },
+  {
+    "name": "sun.text.resources.cldr.FormatData_en_US"
+  },
+  {
+    "name": "sun.util.resources.cldr.CalendarData"
+  },
+  {
+    "name": "org.ofdrw.converter.FontLoader",
     "allDeclaredConstructors": true,
-    "allDeclaredMethods": true
+    "fields": [
+      {
+        "name": "fontNamePathMapping"
+      },
+      {
+        "name": "fontNameAliasMapping"
+      },
+      {
+        "name": "similarFontReplaceRegexMapping"
+      },
+      {
+        "name": "defaultFont"
+      },
+      {
+        "name": "iTextDefaultFont"
+      },
+      {
+        "name": "DefaultFontPath"
+      },
+      {
+        "name": "instance"
+      }
+    ]
   }
 ]
