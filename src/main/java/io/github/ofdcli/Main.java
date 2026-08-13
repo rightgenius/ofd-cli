@@ -1,6 +1,5 @@
 package io.github.ofdcli;
 
-import io.github.ofdcli.awt.NativeImageFontBootstrap;
 import io.github.ofdcli.cmd.DecryptCommand;
 import io.github.ofdcli.cmd.EncryptCommand;
 import io.github.ofdcli.cmd.ExtractCommand;
@@ -61,18 +60,14 @@ public class Main implements Runnable {
             System.setProperty("awt.toolkit", "java.awt.HeadlessToolkit");
         }
         // Native-image: BouncyCastleProvider must be available for sign/verify/validate.
-        // The static initializer in this class runs at image-build time, so adding
-        // it there should make the provider known to the substrate VM. We try this
-        // best-effort; if it doesn't take, sign/verify/validate will fail at
-        // runtime on native-image and the user should fall back to the fat-jar.
-        if (System.getProperty("java.security.Security") == null) {
-            try {
-                Class<?> bc = Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider");
-                java.security.Provider p = (java.security.Provider) bc.getDeclaredConstructor().newInstance();
-                java.security.Security.addProvider(p);
-            } catch (Throwable t) {
-                // BC not on classpath — skip.
-            }
+        // The class's <clinit> calls Security.addProvider(...); loading it here
+        // triggers the static initializer at image startup. See ProviderBootstrap
+        // javadoc for why a runtime <clinit> is the right pattern.
+        try {
+            Class.forName("io.github.ofdcli.security.ProviderBootstrap");
+        } catch (Throwable t) {
+            // Class not on classpath (BC is a transitive dep of ofdrw-gm; this
+            // catch is just defensive for slimmed-down test classpaths).
         }
         // Native-image: java.home is unset which breaks FontConfiguration lookup.
         // Point it to the JDK install we built from. Only set if missing.

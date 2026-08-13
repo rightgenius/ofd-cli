@@ -1066,13 +1066,7 @@
     ]
   },
   {
-    "name": "org.bouncycastle.jcajce.provider.asymmetric.RSA$Mappings",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.RSA$Mappings"
   },
   {
     "name": "org.bouncycastle.jcajce.provider.asymmetric.SLHDSA$Mappings",
@@ -1310,21 +1304,10 @@
   },
   {
     "name": "org.bouncycastle.jcajce.provider.digest.SM3$Digest",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
+    "allDeclaredConstructors": true
   },
   {
-    "name": "org.bouncycastle.jcajce.provider.digest.SM3$Mappings",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
+    "name": "org.bouncycastle.jcajce.provider.digest.SM3$Mappings"
   },
   {
     "name": "org.bouncycastle.jcajce.provider.digest.Skein$Mappings",
@@ -1426,13 +1409,7 @@
     ]
   },
   {
-    "name": "org.bouncycastle.jcajce.provider.symmetric.AES$Mappings",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
+    "name": "org.bouncycastle.jcajce.provider.symmetric.AES$Mappings"
   },
   {
     "name": "org.bouncycastle.jcajce.provider.symmetric.ARC4$Mappings",
@@ -2747,5 +2724,100 @@
         "name": "instance"
       }
     ]
+  },
+  {
+    "name": "org.bouncycastle.jce.provider.BouncyCastleProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ec.EC$Mappings"
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi$EC",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi$ECDSA",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ec.KeyPairGeneratorSpi",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ec.KeyPairGeneratorSpi$EC",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ec.KeyPairGeneratorSpi$ECDSA",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.ec.SignatureSpi$SM3withSM2",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyFactorySpi",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyPairGeneratorSpi",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSignatureSpi$PSSwithRSA",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSignatureSpi$SHA256",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.digest.SM3$Spi",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.symmetric.AES$CBC",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.crypto.paddings.PKCS7Padding",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.x509.X509CertificateFactory",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.x509.X509CertificateFactory$Mappings"
+  },
+  {
+    "name": "org.bouncycastle.jcajce.provider.x509.CertificateFactory",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.bouncycastle.jce.provider.X509CertificateObject",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "org.bouncycastle.asn1.x509.Certificate"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.bouncycastle.jce.provider.JDKX509CertificateFactory",
+    "allDeclaredConstructors": true
   }
 ]

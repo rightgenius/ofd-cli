@@ -146,8 +146,13 @@
                         <buildArg>--install-exit-handlers</buildArg>
                         <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                         <buildArg>-H:+AddAllCharsets</buildArg>
-                        <!-- Add all security service classes (BouncyCastle, SM2, etc.)
-                             so sign/verify/validate can use SM2/SM3 at runtime. -->
+                        <!-- Note: sign/verify/validate need a BouncyCastleProvider,
+                             which GraalVM 25.0.4 CE cannot register in the closed-world
+                             set without significant work (Quarkus uses Gizmo-generated
+                             class + Substitutions to reset BC's SecureRandom fields).
+                             These commands therefore work on the fat-jar but not on the
+                             native binary. See README "Native vs fat-jar" matrix and
+                             the upstream GraalVM issue tracker for progress. -->
                         <buildArg>--enable-all-security-services</buildArg>
                     </buildArgs>
                 </configuration>
