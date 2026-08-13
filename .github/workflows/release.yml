@@ -59,11 +59,14 @@ jobs:
           ./target/ofd --help > /dev/null
           echo "OK"
 
+      - name: Rename binary with platform suffix (avoid name collision on release)
+        run: mv target/ofd target/ofd-darwin-arm64
+
       - name: Upload native artifact
         uses: actions/upload-artifact@v4
         with:
           name: ofd-darwin-arm64
-          path: target/ofd
+          path: target/ofd-darwin-arm64
           if-no-files-found: error
 
       - name: Upload fat-jar
@@ -116,11 +119,14 @@ jobs:
           ./target/ofd --help > /dev/null
           echo "OK"
 
+      - name: Rename binary with platform suffix (avoid name collision on release)
+        run: mv target/ofd target/ofd-linux-x64
+
       - name: Upload native artifact
         uses: actions/upload-artifact@v4
         with:
           name: ofd-linux-x64
-          path: target/ofd
+          path: target/ofd-linux-x64
           if-no-files-found: error
 
   # ----- Create the GitHub release with all artifacts -----
