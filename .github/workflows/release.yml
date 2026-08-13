@@ -39,16 +39,15 @@ jobs:
       # com.github.rightgenius coordinate so the build never touches JitPack.
       - name: Build ofdrw fork (2.4.0-openpdf.2) and install to local m2
         run: |
-          set -x
+          set -euo pipefail
           git clone --depth 1 --branch v2.4.0-openpdf.2 \
             https://github.com/rightgenius/ofdrw.git /tmp/ofdrw-fork
           cd /tmp/ofdrw-fork
-          # parent pom already pins <version>2.4.0-openpdf.2</version>; no -Drevision needed.
-          mvn -B -DskipTests -Dgpg.skip=true \
-              -pl '!ofdrw-pdfbox' \
-              install
-          set +x
-          # Also install ofdrw-full meta-jar under the com.github.rightgenius
+          # parent pom already pins <version>2.4.0-openpdf.2</version>. Note:
+          # the fork's feature/openpdf-replacement branch doesn't include the
+          # upstream ofdrw-pdfbox module, so we don't pass -pl exclusions.
+          mvn -B -DskipTests -Dgpg.skip=true install
+          # Install ofdrw-full meta-jar under the com.github.rightgenius
           # coordinate the ofd-cli pom actually pulls.
           cat > /tmp/ofdrw-full-pom.xml <<'POM'
           <?xml version="1.0" encoding="UTF-8"?>
@@ -144,14 +143,11 @@ jobs:
 
       - name: Build ofdrw fork (2.4.0-openpdf.2) and install to local m2
         run: |
-          set -x
+          set -euo pipefail
           git clone --depth 1 --branch v2.4.0-openpdf.2 \
             https://github.com/rightgenius/ofdrw.git /tmp/ofdrw-fork
           cd /tmp/ofdrw-fork
-          mvn -B -DskipTests -Dgpg.skip=true \
-              -pl '!ofdrw-pdfbox' \
-              install
-          set +x
+          mvn -B -DskipTests -Dgpg.skip=true install
           cat > /tmp/ofdrw-full-pom.xml <<'POM'
           <?xml version="1.0" encoding="UTF-8"?>
           <project xmlns="http://maven.apache.org/POM/4.0.0">

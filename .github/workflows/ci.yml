@@ -39,10 +39,10 @@ jobs:
           git clone --depth 1 --branch v2.4.0-openpdf.2 \
             https://github.com/rightgenius/ofdrw.git /tmp/ofdrw-fork
           cd /tmp/ofdrw-fork
-          # parent pom already pins <version>2.4.0-openpdf.2</version>
-          mvn -B -DskipTests -Dgpg.skip=true \
-              -pl '!ofdrw-pdfbox' \
-              install
+          # parent pom already pins <version>2.4.0-openpdf.2</version>. Note:
+          # the fork's feature/openpdf-replacement branch doesn't include the
+          # upstream ofdrw-pdfbox module, so we don't pass -pl exclusions.
+          mvn -B -DskipTests -Dgpg.skip=true install
           # Install ofdrw-full meta-jar under the com.github.rightgenius
           # coordinate the ofd-cli pom actually pulls.
           cat > /tmp/ofdrw-full-pom.xml <<'POM'
