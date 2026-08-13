@@ -86,12 +86,35 @@ jobs:
             -Dpackaging=jar
 
       - name: Set up GraalVM JDK 25
-        uses: graalvm/setup-graalvm@main
-        with:
-          distribution: 'graalvm-community'
-          java-version: '25'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          components: 'native-image'
+        run: |
+          # setup-graalvm@v1 only ships with LTS releases baked in
+          # (jdk-21.0.2, jdk-25.0.2 as of v1.6.4). 21.0.2 doesn't emit
+          # lib*.dylib on macOS arm64 native-image; jdk-25.0.2 emits them
+          # but System.loadLibrary("awt") inside the binary can't find
+          # them at runtime because of a known GraalVM 25.0.2 closed-world
+          # regression with AWT (see the runtime error in test logs).
+          # graal-25.2.4 (tagged with JDK level 25.0.4) fixes both. Pull
+          # the tarball directly to avoid fighting setup-graalvm's
+          # release-list resolution.
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            ASSET="graalvm-community-jdk-25i2-25.0.4_macos-aarch64_bin.tar.gz"
+          else
+            ASSET="graalvm-community-jdk-25i2-25.0.4_linux-x64_bin.tar.gz"
+          fi
+          echo "→ Downloading GraalVM $ASSET"
+          curl -fsSL -o /tmp/graal.tar.gz \
+            "https://github.com/graalvm/graalvm-ce-builds/releases/download/graal-25.2.4/$ASSET"
+          mkdir -p /opt/graalvm
+          tar -xzf /tmp/graal.tar.gz -C /opt/graalvm
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            echo "JAVA_HOME=/opt/graalvm/graalvm-community-openjdk-25.0.4+10.1/Contents/Home" >> $GITHUB_ENV
+          else
+            echo "JAVA_HOME=/opt/graalvm/graalvm-community-openjdk-25.0.4+10.1" >> $GITHUB_ENV
+          fi
+          echo "PATH=$JAVA_HOME/bin:$PATH" >> $GITHUB_ENV
+          echo "→ Installed GraalVM at $JAVA_HOME"
+          "$JAVA_HOME/bin/java" -version
+          "$JAVA_HOME/bin/native-image" --version
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -213,12 +236,26 @@ jobs:
             -Dpackaging=jar
 
       - name: Set up GraalVM JDK 25
-        uses: graalvm/setup-graalvm@main
-        with:
-          distribution: 'graalvm-community'
-          java-version: '25'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          components: 'native-image'
+        run: |
+          # See macOS job for full comment; same setup here.
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            ASSET="graalvm-community-jdk-25i2-25.0.4_macos-aarch64_bin.tar.gz"
+          else
+            ASSET="graalvm-community-jdk-25i2-25.0.4_linux-x64_bin.tar.gz"
+          fi
+          echo "→ Downloading GraalVM $ASSET"
+          curl -fsSL -o /tmp/graal.tar.gz \
+            "https://github.com/graalvm/graalvm-ce-builds/releases/download/graal-25.2.4/$ASSET"
+          mkdir -p /opt/graalvm
+          tar -xzf /tmp/graal.tar.gz -C /opt/graalvm
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            echo "JAVA_HOME=/opt/graalvm/graalvm-community-openjdk-25.0.4+10.1/Contents/Home" >> $GITHUB_ENV
+          else
+            echo "JAVA_HOME=/opt/graalvm/graalvm-community-openjdk-25.0.4+10.1" >> $GITHUB_ENV
+          fi
+          echo "PATH=$JAVA_HOME/bin:$PATH" >> $GITHUB_ENV
+          "$JAVA_HOME/bin/java" -version
+          "$JAVA_HOME/bin/native-image" --version
 
       - name: Install basic CJK fonts (for native-image FontLoader scan)
         run: |
