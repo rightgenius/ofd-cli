@@ -295,6 +295,10 @@ jobs:
           # System.loadLibrary("awt") etc. at runtime and macOS's loader
           # only finds them via LC_LOAD_DYLIB in the binary's own directory.
           # install.sh downloads them alongside ofd and chmods them.
+          #
+          # Newer GraalVM versions (>= 25.0) build statically-linked macOS
+          # binaries that don't emit lib*.dylib siblings, so we don't fail
+          # on unmatched globs — those entries are skipped.
           files: |
             dist/ofd-darwin-arm64/ofd-darwin-arm64
             dist/ofd-darwin-arm64/libawt.dylib
@@ -310,4 +314,4 @@ jobs:
             dist/ofd-linux-x64/ofd-linux-x64
             dist/ofd-cli-jar/ofd-cli.jar
             dist/SHA256SUMS
-          fail_on_unmatched_files: true
+          fail_on_unmatched_files: false
