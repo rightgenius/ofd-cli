@@ -29,7 +29,9 @@
         <!-- ofdrw fork: 2.4.0-openpdf.1 from rightgenius/ofdrw replaces
              PDFBox with OpenPDF in the OFD→PDF exporter (PDFExporterOpenPDF),
              making to-pdf work in GraalVM native-image. PDF→OFD is broken
-             in this variant (PDFConverter is a stub). -->
+             in this variant (PDFConverter is a stub).
+             Sourced via JitPack (com.github.rightgenius:ofdrw-full:2.4.0-openpdf.1)
+             so the CI can resolve the dependency without manually mvn install. -->
         <ofdrw.version>2.4.0-openpdf.1</ofdrw.version>
         <jackson.version>2.16.1</jackson.version>
 
@@ -63,17 +65,19 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- All ofdrw capabilities (full = core/layout/pkg/font/reader/gm/sign/converter/tool/graphics2d/gv).
-             Crypto (encrypt/decrypt/integrity) is a separate module. -->
+        <!-- ofdrw 2.4.0-openpdf.1 (PDFBox -> OpenPDF fork) via JitPack.
+             The fork at github.com/rightgenius/ofdrw is built on demand by
+             jitpack.io. Use groupId 'com.github.rightgenius' instead of
+             'org.ofdrw' so JitPack serves it. -->
         <dependency>
-            <groupId>org.ofdrw</groupId>
+            <groupId>com.github.rightgenius</groupId>
             <artifactId>ofdrw-full</artifactId>
             <version>${ofdrw.version}</version>
         </dependency>
 
-        <!-- OFD crypto module: encrypt/decrypt/validate -->
+        <!-- ofdrw-crypto: same fork, same source. -->
         <dependency>
-            <groupId>org.ofdrw</groupId>
+            <groupId>com.github.rightgenius</groupId>
             <artifactId>ofdrw-crypto</artifactId>
             <version>${ofdrw.version}</version>
         </dependency>
@@ -85,6 +89,14 @@
             <version>${jackson.version}</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <!-- JitPack builds the openpdf fork of ofdrw on demand. -->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <build>
         <finalName>ofd-cli</finalName>
