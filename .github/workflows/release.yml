@@ -148,12 +148,17 @@ jobs:
           file dist/ofd-darwin-arm64/ofd 2>/dev/null || true
           file dist/ofd-linux-x64/ofd    2>/dev/null || true
 
-      - name: Generate checksums
+      - name: Generate checksums (basename only — install.sh greps by name)
         working-directory: dist
         run: |
-          for f in $(find . -type f); do
-            sha256sum "$f" >> SHA256SUMS
+          # Strip the directory prefix so SHA256SUMS has lines like:
+          #   abc123...  ofd-darwin-arm64
+          # rather than:
+          #   abc123...  ./ofd-darwin-arm64/ofd-darwin-arm64
+          for f in $(find . -type f -not -name SHA256SUMS); do
+            sha256sum "$f" | awk '{print $1 "  " $2}' | sed -E 's|^./[^/]+/||' >> SHA256SUMS
           done
+          echo "=== SHA256SUMS ==="
           cat SHA256SUMS
 
       - name: Create / update GitHub release
