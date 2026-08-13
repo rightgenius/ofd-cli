@@ -150,7 +150,7 @@ $ ofd info invoice.ofd --json | jq '.'
 | 启动时间 | < 100 ms | ~500 ms |
 | 大小 | 54 MB | 33 MB |
 | JRE 依赖 | 无 | 需要 JRE 11+ |
-| 子命令数 | **10** | **13** |
+| 子命令数 | **7** | **13** |
 
 native binary 是首选。fat-jar 是兜底——当 native 缺某个子命令时用它。
 
@@ -345,24 +345,30 @@ else:
 
 ## Native 二进制限制
 
-native binary 出于以下原因**故意不注册** `sign` / `verify` / `validate` 三个子命令：
+native binary 出于以下原因**故意不注册** 6 个子命令（`sign` / `verify` / `validate` / `to-pdf` / `to-html` / `to-svg`）——它们注册了也跑不起来，干脆不暴露给用户。
 
-> GraalVM 25.0.4 CE 的 [closed-world JCE 验证](https://github.com/oracle/graal/issues/13412) 要求 `BouncyCastleProvider` 在 build time 就注册到 `Security`，但当前工具链在 `feature/bouncycastle-substitutions` 之类的解决方案落地前无法做到。
+**为什么不注册而不是 fail gracefully**：CLI 不会因为「子命令注册了但运行报错」比「子命令不存在」更友好。报 `Unknown command` 明确告诉用户「这个 binary 没这个能力，去看文档」；报 UnsatisfiedLinkError 只会让用户怀疑这是 bug。
 
-其它 ❌ 项（`to-pdf` / `to-html` / `to-svg`）是 **AWT CFontManager JNI lookup** 失败导致的渲染子命令不可用。
+**为什么这 6 个跑不起来**：
+
+| 子命令 | 根因 | 详细 |
+|---|---|---|
+| `sign` / `verify` / `validate` | GraalVM 25.0.4 CE 的 closed-world JCE 验证 | 见 [oracle/graal#13412](https://github.com/oracle/graal/issues/13412) — `BouncyCastleProvider` 需要 build time 注册到 `Security`，但工具链目前没有 BouncyCastleSubstitutions 那套方案（参见 [Quarkus #23527](https://github.com/quarkusio/quarkus/pull/23527) 怎么做的） |
+| `to-pdf` | PDFBox PDDocument.\<clinit\> 触发 AWT ColorModel | PDFBox 初始化时调 `System.loadLibrary("awt")`，substrate VM 没有 awt native library → UnsatisfiedLinkError |
+| `to-html` / `to-svg` | AWTMaker 父类触发 `sun/font/CFontManager` JNI | macOS 字体管理器在 native-image 下无法解析 → SIGABRT |
 
 完整支持矩阵：
 
-| 子命令 | native | fat-jar | 原因 |
-|---|:---:|:---:|---|
-| `version`, `info` | ✅ | ✅ | |
-| `to-png`, `extract` | ✅ | ✅ | |
-| `merge`, `encrypt`, `decrypt` | ✅ | ✅ | |
-| `to-pdf` | ❌ | ✅ | PDFBox 反射 + AWT |
-| `to-html`, `to-svg` | ❌ | ✅ | AWT CFontManager JNI |
-| `sign` | ❌ 不注册 | ✅ | GraalVM BC provider 限制 |
-| `verify` | ❌ 不注册 | ✅ | 同上 |
-| `validate` | ❌ 不注册 | ✅ | 同上 |
+| 子命令 | native | fat-jar |
+|---|:---:|:---:|
+| `version`, `info` | ✅ | ✅ |
+| `to-png`, `extract` | ✅ | ✅ |
+| `merge`, `encrypt`, `decrypt` | ✅ | ✅ |
+| `to-pdf` | ❌ 不注册 | ✅ |
+| `to-html`, `to-svg` | ❌ 不注册 | ✅ |
+| `sign` | ❌ 不注册 | ✅ |
+| `verify` | ❌ 不注册 | ✅ |
+| `validate` | ❌ 不注册 | ✅ |
 
 需要这些子命令时直接用 fat-jar：
 

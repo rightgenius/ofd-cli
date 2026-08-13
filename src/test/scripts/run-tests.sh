@@ -123,20 +123,23 @@ run_test_contains "png-single"     0 "page(s)"   "$BIN to-png '$RES/helloworld-r
 run_test             "png-bogus"      2                   "$BIN to-png /tmp/__nonexistent__ -o '$TMP/png/'"
 
 # --- to-pdf ---
-# PDFExporterPDFBox on native-image triggers PDFBox internal reflection
-# that the agent didn't capture (ExceptionInInitializerError). Skipped.
+# On native-image, PDFBox's PDDocument.<clinit> touches
+# java.awt.image.ColorModel which calls System.loadLibrary("awt") and fails
+# (no AWT native library in the substrate VM). The to-pdf subcommand is
+# therefore not registered on the native binary (see Main.NATIVE_SUBCOMMANDS);
+# the fat-jar has full PDFBox support.
 if [[ "$MODE" == "jar" ]]; then
   echo "[to-pdf]"
   run_test_contains "pdf-single"     0 "OK"        "$BIN to-pdf '$RES/helloworld-render.ofd' -o '$TMP/out.pdf'"
   [[ -s "$TMP/out.pdf" && "$(head -c 4 "$TMP/out.pdf")" == "%PDF" ]] && { echo "  PASS  pdf-magic"; PASS=$((PASS+1)); } || { echo "  FAIL  pdf-magic"; FAIL=$((FAIL+1)); FAILED_TESTS+=("pdf-magic"); }
 else
-  echo "[to-pdf] (skipped on native: PDFBox reflection uninitialized at build time)"
+  echo "[to-pdf] (skipped on native: subcommand not registered, see Main.NATIVE_SUBCOMMANDS)"
   PASS=$((PASS+2))
 fi
 
 # --- to-html / to-svg ---
-# These rely on macOS AWT CFontManager which is not supported in GraalVM
-# native-image. They pass on the fat-jar (JVM) but fail on the native binary.
+# Same as to-pdf: these derive from AWTMaker and fail at native-image runtime
+# (HtmlMaker / SVGExporter touch AWT CFontManager). Not registered on native.
 if [[ "$MODE" == "jar" ]]; then
   echo "[to-html]"
   run_test_contains "html-single"    0 "OK"        "$BIN to-html '$RES/helloworld-render.ofd' -o '$TMP/out.html'"
@@ -147,9 +150,9 @@ if [[ "$MODE" == "jar" ]]; then
   run_test_contains "svg-single"     0 "OK"        "$BIN to-svg '$RES/helloworld-render.ofd' -o '$TMP/svg/'"
   [[ -d "$TMP/svg/helloworld-render" ]] && { echo "  PASS  svg-subdir-exists"; PASS=$((PASS+1)); } || { echo "  FAIL  svg-subdir-exists"; FAIL=$((FAIL+1)); FAILED_TESTS+=("svg-subdir-exists"); }
 else
-  echo "[to-html] (skipped on native: AWT CFontManager not available)"
+  echo "[to-html] (skipped on native: subcommand not registered, see Main.NATIVE_SUBCOMMANDS)"
   PASS=$((PASS+2))
-  echo "[to-svg] (skipped on native: AWT CFontManager not available)"
+  echo "[to-svg] (skipped on native: subcommand not registered, see Main.NATIVE_SUBCOMMANDS)"
   PASS=$((PASS+2))
 fi
 

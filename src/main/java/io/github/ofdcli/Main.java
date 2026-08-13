@@ -28,11 +28,12 @@ import picocli.CommandLine.ScopeType;
                 "Run 'ofd <command> --help' for command-specific help.",
                 "",
                 "Two distributions are shipped:",
-                "  • ofd         (native binary, 10 subcommands — see list below)",
+                "  • ofd         (native binary, 7 subcommands — see list below)",
                 "  • ofd-cli.jar (fat-jar, all 13 subcommands, requires JRE 11+)",
-                "The sign/verify/validate subcommands are only available in the fat-jar",
-                "because of an upstream GraalVM 25.0.4 CE limitation on BouncyCastle",
-                "provider registration. See oracle/graal#13412."})
+                "The sign/verify/validate/to-pdf/to-html/to-svg subcommands are only",
+                "available in the fat-jar: sign/verify/validate need a BouncyCastle",
+                "provider that GraalVM 25.0.4 CE cannot register (oracle/graal#13412);",
+                "to-pdf/to-html/to-svg need AWT which the substrate VM cannot load."})
 public class Main implements Runnable {
 
     /**
@@ -55,20 +56,29 @@ public class Main implements Runnable {
     };
 
     /**
-     * The 10 subcommands that work in GraalVM native-image today.
-     * The three BC-dependent ones ({@link SignCommand}, {@link VerifyCommand},
-     * {@link ValidateCommand}) are excluded because the closed-world
-     * JceSecurity.getVerificationResult check in GraalVM 25.0.4 CE throws
-     * "Attempted to verify a provider that was not registered at build time"
-     * for runtime-registered BouncyCastleProvider instances.
+     * The 7 subcommands that work in GraalVM native-image today.
+     *
+     * <p>Excluded from the native binary (kept in the fat-jar):</p>
+     * <ul>
+     *   <li>{@link SignCommand}, {@link VerifyCommand}, {@link ValidateCommand} —
+     *       need a BouncyCastleProvider that the closed-world
+     *       JceSecurity.getVerificationResult check in GraalVM 25.0.4 CE
+     *       refuses to verify for runtime-registered providers
+     *       (see oracle/graal#13412).</li>
+     *   <li>{@link ToPdfCommand} — PDFBox's PDDocument.&lt;clinit&gt; touches
+     *       java.awt.image.ColorModel, which calls System.loadLibrary("awt");
+     *       the substrate VM has no AWT native library on the classpath
+     *       (UnsatisfiedLinkError).</li>
+     *   <li>{@link ToHtmlCommand}, {@link ToSvgCommand} — HtmlMaker / SVGExporter
+     *       extend AWTMaker, which on macOS triggers
+     *       {@code sun/font/CFontManager} JNI lookups that fail with SIGABRT
+     *       in the substrate VM.</li>
+     * </ul>
      */
     private static final Class<?>[] NATIVE_SUBCOMMANDS = {
             VersionCommand.class,
             InfoCommand.class,
             ToPngCommand.class,
-            ToPdfCommand.class,
-            ToHtmlCommand.class,
-            ToSvgCommand.class,
             ExtractCommand.class,
             MergeCommand.class,
             EncryptCommand.class,
