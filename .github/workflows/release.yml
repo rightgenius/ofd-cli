@@ -100,10 +100,10 @@ jobs:
           mkdir -p "$GRAAL_ROOT"
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             ASSET="graalvm-community-jdk-25i2-25.0.4_macos-aarch64_bin.tar.gz"
-            JAVA_HOME="$GRAAL_ROOT/graalvm-community-openjdk-25.0.4+10.1/Contents/Home"
+            JAVA_HOME="$GRAAL_ROOT/graalvm-community-25.2.4+7.1/Contents/Home"
           else
             ASSET="graalvm-community-jdk-25i2-25.0.4_linux-x64_bin.tar.gz"
-            JAVA_HOME="$GRAAL_ROOT/graalvm-community-openjdk-25.0.4+10.1"
+            JAVA_HOME="$GRAAL_ROOT/graalvm-community-25.2.4+7.1"
           fi
           echo "→ Downloading GraalVM $ASSET"
           curl -fsSL -o /tmp/graal.tar.gz \
@@ -241,10 +241,10 @@ jobs:
           mkdir -p "$GRAAL_ROOT"
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             ASSET="graalvm-community-jdk-25i2-25.0.4_macos-aarch64_bin.tar.gz"
-            JAVA_HOME="$GRAAL_ROOT/graalvm-community-openjdk-25.0.4+10.1/Contents/Home"
+            JAVA_HOME="$GRAAL_ROOT/graalvm-community-25.2.4+7.1/Contents/Home"
           else
             ASSET="graalvm-community-jdk-25i2-25.0.4_linux-x64_bin.tar.gz"
-            JAVA_HOME="$GRAAL_ROOT/graalvm-community-openjdk-25.0.4+10.1"
+            JAVA_HOME="$GRAAL_ROOT/graalvm-community-25.2.4+7.1"
           fi
           echo "→ Downloading GraalVM $ASSET"
           curl -fsSL -o /tmp/graal.tar.gz \
