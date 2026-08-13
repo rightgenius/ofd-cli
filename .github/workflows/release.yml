@@ -76,6 +76,14 @@ jobs:
           mvn -B install:install-file \
             -Dfile=/tmp/ofdrw-fork/ofdrw-full/target/ofdrw-full-2.4.0-openpdf.2.jar \
             -DpomFile=/tmp/ofdrw-full-pom.xml
+          # ofdrw-crypto is a separate module the ofd-cli pom also pulls
+          # under the com.github.rightgenius coordinate — install it too.
+          mvn -B install:install-file \
+            -Dfile=/tmp/ofdrw-fork/ofdrw-crypto/target/ofdrw-crypto-2.4.0-openpdf.2.jar \
+            -DgroupId=com.github.rightgenius \
+            -DartifactId=ofdrw-crypto \
+            -Dversion=2.4.0-openpdf.2 \
+            -Dpackaging=jar
 
       - name: Set up GraalVM JDK 25
         uses: graalvm/setup-graalvm@v1
@@ -175,6 +183,14 @@ jobs:
           mvn -B install:install-file \
             -Dfile=/tmp/ofdrw-fork/ofdrw-full/target/ofdrw-full-2.4.0-openpdf.2.jar \
             -DpomFile=/tmp/ofdrw-full-pom.xml
+          # ofdrw-crypto is a separate module the ofd-cli pom also pulls
+          # under the com.github.rightgenius coordinate — install it too.
+          mvn -B install:install-file \
+            -Dfile=/tmp/ofdrw-fork/ofdrw-crypto/target/ofdrw-crypto-2.4.0-openpdf.2.jar \
+            -DgroupId=com.github.rightgenius \
+            -DartifactId=ofdrw-crypto \
+            -Dversion=2.4.0-openpdf.2 \
+            -Dpackaging=jar
 
       - name: Set up GraalVM JDK 25
         uses: graalvm/setup-graalvm@v1
