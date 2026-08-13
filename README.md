@@ -4,6 +4,8 @@
 > 专为 **AI Agent** 与**自动化流水线**设计：单文件静态二进制、标准化退出码、JSON 输出。
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/rightgenius/ofd-cli/ci.yml?branch=main&label=CI)](https://github.com/rightgenius/ofd-cli/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/rightgenius/ofd-cli?label=release)](https://github.com/rightgenius/ofd-cli/releases/latest)
 [![Java 11+](https://img.shields.io/badge/Java-11%2B-orange.svg)](https://adoptium.net/)
 [![Native binary](https://img.shields.io/badge/native--image-54MB-success.svg)](https://www.graalvm.org/native-image/)
 [![Maven Central](https://img.shields.io/badge/ofdrw-2.4.0-informational.svg)](https://central.sonatype.com/artifact/org.ofdrw/ofdrw-full)
@@ -31,31 +33,74 @@
 
 ## 安装
 
-### macOS / Linux（推荐）
+### 一行安装（推荐）✨
+
+**macOS / Linux**：
 
 ```bash
-# 方式 A：Homebrew（待发布）
-brew install ofdcli/tap/ofd
+curl -fsSL https://raw.githubusercontent.com/rightgenius/ofd-cli/main/scripts/install.sh | sh
+```
 
-# 方式 B：GitHub Releases 下载
-#   https://github.com/ofdcli/ofd-cli/releases/latest
-curl -L https://github.com/ofdcli/ofd-cli/releases/latest/download/ofd-darwin-arm64 -o ofd
-chmod +x ofd && sudo mv ofd /usr/local/bin/
+脚本会自动：
+1. 识别你的平台（macOS arm64 / Linux x64 / Linux arm64）
+2. 从最新 [GitHub Release](https://github.com/rightgenius/ofd-cli/releases/latest) 下载对应的 native binary
+3. 校验 SHA-256 哈希
+4. 安装到 `/usr/local/bin/ofd`（有写权限）或 `~/.local/bin/ofd`（无 sudo 时）
+5. 跑 `ofd --version` 验证
 
-# 验证
+环境变量：
+- `OFD_VERSION=v0.1.0` — 锁定特定版本（默认：latest）
+- `OFD_INSTALL_DIR=/path` — 覆盖安装位置
+
+### Homebrew（待发布）
+
+```bash
+brew install rightgenius/tap/ofd
+```
+
+### 手动下载
+
+从 [Releases](https://github.com/rightgenius/ofd-cli/releases/latest) 页面下载对应平台的 binary：
+
+| 平台 | 文件名 |
+|---|---|
+| macOS arm64 (Apple Silicon) | `ofd-darwin-arm64` |
+| macOS x86_64 (Intel) | _暂未提供_ |
+| Linux x86_64 | `ofd-linux-x64` |
+| Linux arm64 | _暂未提供_ |
+| Windows x86_64 | _暂未提供_（先用 fat-jar） |
+
+```bash
+# 示例：手动安装 macOS arm64 版本
+curl -L -o ofd https://github.com/rightgenius/ofd-cli/releases/latest/download/ofd-darwin-arm64
+chmod +x ofd
+sudo mv ofd /usr/local/bin/
 ofd --version
 ```
 
 ### Windows
 
-从 [Releases](https://github.com/ofdcli/ofd-cli/releases/latest) 下载 `ofd-windows-amd64.exe`。
+PowerShell：
 
-### JRE 不可用的环境 / 完整功能
+```powershell
+Invoke-WebRequest -Uri "https://github.com/rightgenius/ofd-cli/releases/latest/download/ofd-windows-x64.exe" -OutFile "ofd.exe"
+```
+
+或先用 fat-jar（功能完整，需要 JRE 11+）：
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/rightgenius/ofd-cli/releases/latest/download/ofd-cli.jar" -OutFile "ofd-cli.jar"
+java -jar ofd-cli.jar --version
+```
+
+### 校验下载
+
+每个 release 附带 `SHA256SUMS` 文件：
 
 ```bash
-# fat-jar（需 JRE 11+）
-curl -L https://github.com/ofdcli/ofd-cli/releases/latest/download/ofd-cli.jar -o ofd-cli.jar
-java -jar ofd-cli.jar --version
+# 下载后校验
+curl -L -O https://github.com/rightgenius/ofd-cli/releases/latest/download/SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS
 ```
 
 ---

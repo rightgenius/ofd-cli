@@ -1,0 +1,62 @@
+# Continuous Integration
+#
+# Runs on every push to main and every pull request:
+#   1. Unit tests (JUnit 5)
+#   2. Fat-jar build (always works, requires only JRE 11+)
+#   3. Integration tests against the fat-jar (39 cases)
+#
+# Native-image build is NOT in this workflow because:
+#   - macOS arm64 native-image requires a self-hosted macOS runner
+#     (GitHub-hosted macOS runners can install GraalVM but the build
+#     is heavy and slow; we do it only on release tags)
+#   - Cross-compile is brittle in 25.0.4
+# If you want to test native locally, see README "Build from source".
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Unit + integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-
+
+      - name: Run unit tests
+        run: mvn -B -o test
+
+      - name: Build fat-jar
+        run: mvn -B -o package -DskipTests
+
+      - name: Run integration tests (fat-jar)
+        run: |
+          chmod +x ./src/test/scripts/run-tests.sh
+          ./src/test/scripts/run-tests.sh -m jar
+
+      - name: Upload fat-jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ofd-cli-jar
+          path: target/ofd-cli.jar
+          if-no-files-found: error
+          retention-days: 7

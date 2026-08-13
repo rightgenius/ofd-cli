@@ -1,0 +1,166 @@
+# Release workflow
+#
+# Triggered on push of a tag matching v*. Builds platform-specific native
+# binaries + the fat-jar, then creates/updates a GitHub release with all
+# artifacts attached.
+#
+# Native-image is platform-bound: each OS/arch combination needs its
+# own runner. macOS arm64 is the most-requested (most users have M-series
+# Macs). Linux x86_64 is the second-most-requested. Windows is future
+# work.
+#
+# To cut a release:
+#   git tag v0.1.0
+#   git push origin v0.1.0
+# Then this workflow runs and creates the GitHub release automatically.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write   # needed for softprops/action-gh-release to create releases
+
+jobs:
+  # ----- Build macOS arm64 (Apple Silicon, most common) -----
+  build-macos-arm64:
+    name: Build (macOS arm64)
+    runs-on: macos-14   # Apple Silicon
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up GraalVM JDK 25
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm-community'
+          java-version: '25'
+          components: 'native-image'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-
+
+      - name: Build fat-jar
+        run: mvn -B -o package -DskipTests
+
+      - name: Build native binary
+        run: mvn -B -o package -Pnative -DskipTests
+
+      - name: Smoke-test native binary
+        run: |
+          ./target/ofd --version
+          ./target/ofd --help > /dev/null
+          echo "OK"
+
+      - name: Upload native artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ofd-darwin-arm64
+          path: target/ofd
+          if-no-files-found: error
+
+      - name: Upload fat-jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: ofd-cli-jar
+          path: target/ofd-cli.jar
+          if-no-files-found: error
+
+  # ----- Build Linux x86_64 -----
+  build-linux-x64:
+    name: Build (Linux x86_64)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up GraalVM JDK 25
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm-community'
+          java-version: '25'
+          components: 'native-image'
+
+      - name: Install basic CJK fonts (for native-image FontLoader scan)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
+          # Sanity: confirm a few font files exist
+          ls /usr/share/fonts/opentype/noto/ 2>/dev/null | head -3
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-
+
+      - name: Build fat-jar
+        run: mvn -B -o package -DskipTests
+
+      - name: Build native binary
+        run: mvn -B -o package -Pnative -DskipTests
+
+      - name: Smoke-test native binary
+        run: |
+          ./target/ofd --version
+          ./target/ofd --help > /dev/null
+          echo "OK"
+
+      - name: Upload native artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ofd-linux-x64
+          path: target/ofd
+          if-no-files-found: error
+
+  # ----- Create the GitHub release with all artifacts -----
+  release:
+    name: Create GitHub Release
+    needs: [build-macos-arm64, build-linux-x64]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Show what we got
+        run: |
+          ls -lh dist/
+          file dist/ofd-darwin-arm64/ofd 2>/dev/null || true
+          file dist/ofd-linux-x64/ofd    2>/dev/null || true
+
+      - name: Generate checksums
+        working-directory: dist
+        run: |
+          for f in $(find . -type f); do
+            sha256sum "$f" >> SHA256SUMS
+          done
+          cat SHA256SUMS
+
+      - name: Create / update GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/ofd-darwin-arm64/ofd
+            dist/ofd-linux-x64/ofd
+            dist/ofd-cli-jar/ofd-cli.jar
+            dist/SHA256SUMS
+          fail_on_unmatched_files: true
