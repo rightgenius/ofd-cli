@@ -89,7 +89,7 @@ jobs:
         uses: graalvm/setup-graalvm@v1
         with:
           distribution: 'graalvm-community'
-          java-version: '25.2'
+          java-version: 'latest'
           components: 'native-image'
 
       - name: Cache Maven packages
@@ -202,7 +202,7 @@ jobs:
         uses: graalvm/setup-graalvm@v1
         with:
           distribution: 'graalvm-community'
-          java-version: '25.2'
+          java-version: 'latest'
           components: 'native-image'
 
       - name: Install basic CJK fonts (for native-image FontLoader scan)
