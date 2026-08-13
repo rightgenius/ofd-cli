@@ -111,16 +111,18 @@ jobs:
           ./target/ofd --help > /dev/null
           echo "OK"
 
-      - name: Rename binary with platform suffix (avoid name collision on release)
-        run: mv target/ofd target/ofd-darwin-arm64
-
-      - name: Stage dylibs (libawt.dylib, libfontmanager.dylib, etc.) alongside binary
+      - name: Stage binary + dylibs into a platform-specific subdirectory
         run: |
           # native-image leaves lib*.dylib siblings of the binary in target/.
           # These are loaded at runtime via System.loadLibrary(); the macOS
-          # loader only finds them in the binary's own directory.
-          # Copy them into target/ofd-darwin-arm64/ so they ship together.
-          mkdir -p target/ofd-darwin-arm64
+          # loader only finds them in the binary's own directory, so we
+          # package the binary and dylibs into target/ofd-darwin-arm64/.
+          # (We can't just `mv target/ofd target/ofd-darwin-arm64/` first
+          # because then mkdir ofd-darwin-arm64 would conflict with the
+          # file of the same name; do everything inside one shell so the
+          # rename-to-dir step is atomic.)
+          mkdir target/ofd-darwin-arm64
+          mv target/ofd target/ofd-darwin-arm64/ofd-darwin-arm64
           cp target/lib*.dylib target/ofd-darwin-arm64/ 2>/dev/null || \
             (echo "WARN: no lib*.dylib found in target/"; exit 1)
           ls -la target/ofd-darwin-arm64/
@@ -225,15 +227,15 @@ jobs:
           ./target/ofd --help > /dev/null
           echo "OK"
 
-      - name: Rename binary with platform suffix (avoid name collision on release)
-        run: mv target/ofd target/ofd-linux-x64
-
-      - name: Stage dylibs alongside binary
+      - name: Stage binary + dylibs into a platform-specific subdirectory
         run: |
           # native-image leaves lib*.so siblings of the binary in target/.
-          # These are loaded at runtime via System.loadLibrary().
-          # Copy them into target/ofd-linux-x64/ so they ship together.
-          mkdir -p target/ofd-linux-x64
+          # These are loaded at runtime via System.loadLibrary(). On Linux
+          # the loader can find them via LD_LIBRARY_PATH or rpath, but we
+          # still package them alongside the binary so the install script
+          # can drop them in ~/.local/bin/ next to the executable.
+          mkdir target/ofd-linux-x64
+          mv target/ofd target/ofd-linux-x64/ofd-linux-x64
           cp target/lib*.so target/ofd-linux-x64/ 2>/dev/null || true
           ls -la target/ofd-linux-x64/
 
