@@ -165,8 +165,8 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            dist/ofd-darwin-arm64/ofd
-            dist/ofd-linux-x64/ofd
+            dist/ofd-darwin-arm64/ofd-darwin-arm64
+            dist/ofd-linux-x64/ofd-linux-x64
             dist/ofd-cli-jar/ofd-cli.jar
             dist/SHA256SUMS
           fail_on_unmatched_files: true
