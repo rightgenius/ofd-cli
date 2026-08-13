@@ -2,6 +2,7 @@ package io.github.ofdcli.cmd;
 
 import io.github.ofdcli.ExitCode;
 import io.github.ofdcli.Main;
+import io.github.ofdcli.util.FontSetup;
 import org.ofdrw.converter.FontLoader;
 import org.ofdrw.converter.ImageMaker;
 import org.ofdrw.reader.OFDReader;
@@ -139,6 +140,12 @@ public class ToPngCommand implements Callable<Integer> {
     }
 
     private void setupFontLoader() {
+        // Same font bootstrap that ToPdf/ToHtml/ToSvg use. Without this call,
+        // FontLoader.getInstance() would invoke init() which scans the system
+        // font dirs and triggers java.awt.Toolkit.<clinit> ->
+        // System.loadLibrary("awt") -> UnsatisfiedLinkError on native-image
+        // (no AWT native library in the substrate VM).
+        FontSetup.setup(extraFontDirs, noDefaultFonts);
         FontLoader fl = FontLoader.getInstance();
         // Common Chinese font aliases — OFDs from gov / Didi typically reference
         // KaiTi/SimSun/Song/Hei families that are absent on Mac/Linux.

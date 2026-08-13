@@ -28,12 +28,14 @@ import picocli.CommandLine.ScopeType;
                 "Run 'ofd <command> --help' for command-specific help.",
                 "",
                 "Two distributions are shipped:",
-                "  • ofd         (native binary, 7 subcommands — see list below)",
+                "  • ofd         (native binary, 8 subcommands — see list below)",
                 "  • ofd-cli.jar (fat-jar, all 13 subcommands, requires JRE 11+)",
-                "The sign/verify/validate/to-pdf/to-html/to-svg subcommands are only",
+                "The sign/verify/validate/to-html/to-svg subcommands are only",
                 "available in the fat-jar: sign/verify/validate need a BouncyCastle",
                 "provider that GraalVM 25.0.4 CE cannot register (oracle/graal#13412);",
-                "to-pdf/to-html/to-svg need AWT which the substrate VM cannot load."})
+                "to-html/to-svg need AWT which the substrate VM cannot load.",
+                "to-pdf is supported in both — see PDFExporterOpenPDF in the",
+                "ofdrw 2.4.0-openpdf.1 fork (rightgenius/ofdrw)."})
 public class Main implements Runnable {
 
     /**
@@ -56,7 +58,7 @@ public class Main implements Runnable {
     };
 
     /**
-     * The 7 subcommands that work in GraalVM native-image today.
+     * The subcommands that work in GraalVM native-image today.
      *
      * <p>Excluded from the native binary (kept in the fat-jar):</p>
      * <ul>
@@ -65,20 +67,24 @@ public class Main implements Runnable {
      *       JceSecurity.getVerificationResult check in GraalVM 25.0.4 CE
      *       refuses to verify for runtime-registered providers
      *       (see oracle/graal#13412).</li>
-     *   <li>{@link ToPdfCommand} — PDFBox's PDDocument.&lt;clinit&gt; touches
-     *       java.awt.image.ColorModel, which calls System.loadLibrary("awt");
-     *       the substrate VM has no AWT native library on the classpath
-     *       (UnsatisfiedLinkError).</li>
      *   <li>{@link ToHtmlCommand}, {@link ToSvgCommand} — HtmlMaker / SVGExporter
      *       extend AWTMaker, which on macOS triggers
      *       {@code sun/font/CFontManager} JNI lookups that fail with SIGABRT
      *       in the substrate VM.</li>
      * </ul>
+     *
+     * <p>{@link ToPdfCommand} <strong>is</strong> registered on the native
+     * binary when ofdrw-converter {@code 2.4.0-openpdf.1} (or any later
+     * OpenPDF-backed variant) is on the classpath — OpenPDF is a pure-Java
+     * fork of iText 4 and does not touch {@code java.awt.image.ColorModel}
+     * at static init, so the {@code UnsatisfiedLinkError} that
+     * PDFBox's PDDocument.&lt;clinit&gt; triggers does not occur.</p>
      */
     private static final Class<?>[] NATIVE_SUBCOMMANDS = {
             VersionCommand.class,
             InfoCommand.class,
             ToPngCommand.class,
+            ToPdfCommand.class,
             ExtractCommand.class,
             MergeCommand.class,
             EncryptCommand.class,

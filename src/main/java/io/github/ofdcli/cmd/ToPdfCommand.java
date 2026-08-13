@@ -6,7 +6,7 @@ import io.github.ofdcli.json.JsonWriter;
 import io.github.ofdcli.util.FilesUtil;
 import io.github.ofdcli.util.FontSetup;
 import org.ofdrw.converter.GeneralConvertException;
-import org.ofdrw.converter.export.PDFExporterPDFBox;
+import org.ofdrw.converter.export.PDFExporterOpenPDF;
 import org.ofdrw.reader.OFDReader;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -23,9 +23,18 @@ import java.util.concurrent.Callable;
 /**
  * Convert OFD file(s) to PDF.
  *
- * <p>Backed by {@link PDFExporterPDFBox} (Apache PDFBox 2.x — no AGPL
- * entanglement). The iText path is intentionally not exposed; the
- * {@code itext7}-based exporter is reserved for an opt-in future flag.
+ * <p>Backed by {@link PDFExporterOpenPDF} (OpenPDF 1.3.39, LGPL fork of
+ * iText 4). The OpenPDF path was chosen over PDFBox because OpenPDF
+ * does not depend on {@code java.awt.image.ColorModel} which would
+ * otherwise call {@code System.loadLibrary("awt")} and fail on
+ * GraalVM native-image (no AWT native library in the substrate VM).
+ *
+ * <p>Requires ofdrw-converter {@code 2.4.0-openpdf.1} (the user-maintained
+ * OpenPDF-enabled variant of ofdrw — see
+ * <a href="https://github.com/rightgenius/ofdrw">rightgenius/ofdrw</a>).
+ * The upstream ofdrw 2.4.0 ships only PDFBox-backed
+ * {@code PDFExporterPDFBox}; that one triggers an {@code UnsatisfiedLinkError}
+ * at native runtime and is therefore unsuitable for the native binary.
  */
 @Command(
         name = "to-pdf",
@@ -88,7 +97,7 @@ public class ToPdfCommand implements Callable<Integer> {
             }
             long s = System.currentTimeMillis();
             try (OFDReader reader = new OFDReader(ofd);
-                 PDFExporterPDFBox exporter = new PDFExporterPDFBox(ofd, outFile)) {
+                 PDFExporterOpenPDF exporter = new PDFExporterOpenPDF(ofd, outFile)) {
                 if (selectedPages == null) {
                     exporter.export();
                 } else {

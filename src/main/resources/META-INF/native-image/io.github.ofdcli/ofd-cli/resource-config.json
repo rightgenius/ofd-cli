@@ -1,0 +1,43 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "comment": "OpenPDF AFM metrics for the standard 14 PDF fonts (Helvetica, Courier, Times, Symbol, ZapfDingbats). Type1Font.<init> reads these at runtime to build the font's char-width table; without them, BaseFont.createFont(\"Helvetica\", ...) throws 'No message found for 1.not.found.as.resource'.",
+        "pattern": "com/lowagie/text/pdf/fonts/.*\\.afm"
+      },
+      {
+        "comment": "CJK font aliases and encoding tables (HeiseiKakuGo, STSong-Light, MSung-Light, etc.) that Type1Font's cjk font lookup needs.",
+        "pattern": "com/lowagie/text/pdf/fonts/.*\\.properties"
+      },
+      {
+        "comment": "CJK cmap tables used when PDF embeds CJK fonts.",
+        "pattern": "com/lowagie/text/pdf/fonts/.*\\.cmap"
+      },
+      {
+        "comment": "OpenPDF's META-INF/versioned duplicates — keep both module path and META-INF/versions/11/...",
+        "pattern": "META-INF/versions/11/com/lowagie/text/pdf/fonts/.*"
+      },
+      {
+        "comment": "Any non-AFM resources in fonts/cmaps/ (CJK cmaps).",
+        "pattern": "com/lowagie/text/pdf/fonts/cmaps/.*"
+      },
+      {
+        "comment": "OpenPDF's other auxiliary resources (font-fallback, etc.) — keep all to be safe.",
+        "pattern": "com/lowagie/text/.*\\.properties"
+      },
+      {
+        "comment": "OpenPDF's font-fallback mappings used when a glyph is missing.",
+        "pattern": "font-fallback/.*"
+      },
+      {
+        "comment": "Adobe glyph name list (e.g. 'A' -> 65, 'aring' -> 0x00E5) used by Type1Font when resolving Unicode codepoints to glyph indices. Without this, text rendering silently drops glyphs (PDF page ends up with empty text).",
+        "pattern": "com/lowagie/text/pdf/fonts/glyphlist\\.txt"
+      },
+      {
+        "comment": "Additional glyph name lists in META-INF/versions/11/",
+        "pattern": "META-INF/versions/11/com/lowagie/text/pdf/fonts/glyphlist\\.txt"
+      }
+    ],
+    "excludes": []
+  }
+}
