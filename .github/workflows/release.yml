@@ -151,15 +151,13 @@ jobs:
       - name: Generate checksums (basename only — install.sh greps by name)
         working-directory: dist
         run: |
-          # Strip the directory prefix so SHA256SUMS has lines like:
+          # find gives paths like `./ofd-darwin-arm64/ofd-darwin-arm64`.
+          # Strip the directory portion so SHA256SUMS has lines like:
           #   abc123...  ofd-darwin-arm64
-          # rather than:
-          #   abc123...  ./ofd-darwin-arm64/ofd-darwin-arm64
-          for f in $(find . -type f -not -name SHA256SUMS); do
-            sha256sum "$f" | awk '{print $1 "  " $2}' | sed -E 's|^./[^/]+/||' >> SHA256SUMS
-          done
-          echo "=== SHA256SUMS ==="
-          cat SHA256SUMS
+          # which is what install.sh's `grep -E "[[:space:]]${ASSET_NAME}\$"` matches.
+          find . -type f -not -name SHA256SUMS -exec sha256sum {} \; \
+            | sed -E 's|^([a-f0-9]+)  \./([^/]+)/([^/]+)$|\1  \3|' \
+            | tee SHA256SUMS
 
       - name: Create / update GitHub release
         uses: softprops/action-gh-release@v2
