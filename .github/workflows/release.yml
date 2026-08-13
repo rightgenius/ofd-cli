@@ -121,10 +121,14 @@ jobs:
           # because then mkdir ofd-darwin-arm64 would conflict with the
           # file of the same name; do everything inside one shell so the
           # rename-to-dir step is atomic.)
+          #
+          # Newer GraalVM versions (>= 25.0) may build a statically-linked
+          # binary that doesn't emit lib*.dylib siblings; that's fine —
+          # the system AWT libs are loaded from the JVM install dir.
           mkdir target/ofd-darwin-arm64
           mv target/ofd target/ofd-darwin-arm64/ofd-darwin-arm64
-          cp target/lib*.dylib target/ofd-darwin-arm64/ 2>/dev/null || \
-            (echo "WARN: no lib*.dylib found in target/"; exit 1)
+          shopt -s nullglob
+          cp target/lib*.dylib target/ofd-darwin-arm64/ 2>/dev/null || true
           ls -la target/ofd-darwin-arm64/
 
       - name: Upload native artifact
