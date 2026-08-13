@@ -86,7 +86,7 @@ jobs:
             -Dpackaging=jar
 
       - name: Set up GraalVM JDK 25
-        uses: graalvm/setup-graalvm@v1
+        uses: graalvm/setup-graalvm@main
         with:
           distribution: 'graalvm-community'
           java-version: 'graal-25.2.4'
@@ -200,7 +200,7 @@ jobs:
             -Dpackaging=jar
 
       - name: Set up GraalVM JDK 25
-        uses: graalvm/setup-graalvm@v1
+        uses: graalvm/setup-graalvm@main
         with:
           distribution: 'graalvm-community'
           java-version: 'graal-25.2.4'
