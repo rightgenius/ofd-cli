@@ -48,10 +48,10 @@ jobs:
           restore-keys: ${{ runner.os }}-m2-
 
       - name: Build fat-jar
-        run: mvn -B -o package -DskipTests
+        run: mvn -B package -DskipTests
 
       - name: Build native binary
-        run: mvn -B -o package -Pnative -DskipTests
+        run: mvn -B package -Pnative -DskipTests
 
       - name: Smoke-test native binary
         run: |
@@ -105,10 +105,10 @@ jobs:
           restore-keys: ${{ runner.os }}-m2-
 
       - name: Build fat-jar
-        run: mvn -B -o package -DskipTests
+        run: mvn -B package -DskipTests
 
       - name: Build native binary
-        run: mvn -B -o package -Pnative -DskipTests
+        run: mvn -B package -Pnative -DskipTests
 
       - name: Smoke-test native binary
         run: |
