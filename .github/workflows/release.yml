@@ -301,17 +301,10 @@ jobs:
           # on unmatched globs — those entries are skipped.
           files: |
             dist/ofd-darwin-arm64/ofd-darwin-arm64
-            dist/ofd-darwin-arm64/libawt.dylib
-            dist/ofd-darwin-arm64/libawt_lwawt.dylib
-            dist/ofd-darwin-arm64/libfontmanager.dylib
-            dist/ofd-darwin-arm64/libfreetype.dylib
-            dist/ofd-darwin-arm64/libjava.dylib
-            dist/ofd-darwin-arm64/libjavajpeg.dylib
-            dist/ofd-darwin-arm64/libjvm.dylib
-            dist/ofd-darwin-arm64/liblcms.dylib
-            dist/ofd-darwin-arm64/libmlib_image.dylib
-            dist/ofd-darwin-arm64/libosxapp.dylib
+            dist/ofd-darwin-arm64/lib*.dylib
+            dist/ofd-darwin-arm64/lib*.so
             dist/ofd-linux-x64/ofd-linux-x64
+            dist/ofd-linux-x64/lib*.so
             dist/ofd-cli-jar/ofd-cli.jar
             dist/SHA256SUMS
           fail_on_unmatched_files: false
