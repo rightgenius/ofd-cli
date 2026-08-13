@@ -17,16 +17,16 @@ Commands:
   to-svg    Convert OFD file(s) to per-page SVG files.
   extract   Extract plain text from OFD file(s).
   merge     Merge multiple OFD files into a single OFD.
-  sign      Sign an OFD file (GB/T 35275 SM2/SM3).
-  verify    Verify digital signatures on an OFD file.
+  sign      Sign an OFD file (GB/T 35275 SM2/SM3).  (fat-jar only)
+  verify    Verify digital signatures on an OFD file.  (fat-jar only)
   encrypt   Encrypt an OFD file with a user password.
   decrypt   Decrypt an OFD file with a user password.
-  validate  Apply or verify OFD integrity protection (GM/T 0099).
+  validate  Apply or verify OFD integrity protection (GM/T 0099).  (fat-jar only)
 ```
 
 ## Features
 
-- **12 subcommands** covering the full OFD lifecycle: inspect, render,
+- **13 subcommands** covering the full OFD lifecycle: inspect, render,
   extract, merge, sign, verify, encrypt, decrypt, integrity-protect.
 - **Single static binary** via GraalVM native-image (~54 MB, no JRE).
 - **AI-friendly**: standardized exit codes (0/1/2/3/4), `--json` global flag
@@ -35,8 +35,8 @@ Commands:
 - **Cross-platform** (macOS / Linux / Windows) — auto-discovers CJK fonts
   from the host system.
 - **Two run modes**:
-  - **fat-jar** (`java -jar ofd-cli.jar`) — full feature set
-  - **native** (`./ofd`) — sub-second startup, no JRE
+  - **fat-jar** (`java -jar ofd-cli.jar`) — full 13 subcommands, requires JRE 11+
+  - **native** (`./ofd`) — 10 subcommands, sub-second startup, no JRE
 
 ## Quick Start
 
@@ -200,33 +200,35 @@ mvn -Pnative -DskipTests clean package
 
 ### Native-image limitations
 
-The native binary supports `info`, `to-png`, `extract`, `merge`,
-`encrypt`, `decrypt`, and `version` out of the box. Three subcommands
-have constraints due to AWT / BouncyCastle integration on the
-available GraalVM 25.0.4 toolchain:
+The native binary exposes only **10 of the 13** subcommands. The
+`sign`, `verify`, and `validate` subcommands are intentionally not
+registered on the native binary (see `Main.NATIVE_SUBCOMMANDS` in
+`Main.java`); they require a BouncyCastleProvider whose closed-world
+registration is not supported in GraalVM 25.0.4 CE
+(see [oracle/graal#13412](https://github.com/oracle/graal/issues/13412)).
 
-| Subcommand          | Native status          | Workaround                              |
-|---------------------|------------------------|-----------------------------------------|
-| `sign` / `verify`   | limited*               | use fat-jar (BC provider registration)  |
-| `validate --apply`  | limited*               | use fat-jar                             |
-| `to-pdf`            | limited**              | use fat-jar (PDFBox reflection)         |
-| `to-html`           | limited***             | use fat-jar (AWT CFontManager)          |
-| `to-svg`            | limited***             | use fat-jar                             |
+For a complete matrix of what works where:
 
-*\* BouncyCastleProvider needs build-time registration; the
-auto-registration trick via static initializer works on the JVM but
-isn't recognized by the substrate VM's "registered at build time" check.
-\*\** PDFBox uses reflection not captured by the native-image-agent
-in our training run.
-\*** `HtmlMaker` / `SVGExporter` derive from `AWTMaker` and trigger
-`sun/font/CFontManager` JNI lookups that aren't resolvable without
-a full macOS JRE.
+| Subcommand                | Native  | Fat-jar | Notes                                    |
+|---------------------------|---------|---------|------------------------------------------|
+| `version`, `info`         | ✅      | ✅      |                                          |
+| `to-png`, `extract`       | ✅      | ✅      |                                          |
+| `merge`, `encrypt`, `decrypt` | ✅  | ✅      |                                          |
+| `to-pdf`                  | ❌      | ✅      | AWT CFontManager / PDFBox reflection     |
+| `to-html`, `to-svg`       | ❌      | ✅      | AWT CFontManager JNI lookup              |
+| `sign`                    | ❌ (not registered) | ✅ | GraalVM 25.0.4 CE BC provider limit  |
+| `verify`                  | ❌ (not registered) | ✅ | same                                     |
+| `validate`                | ❌ (not registered) | ✅ | same                                     |
 
-For these features, use the fat-jar:
+For the subcommands the native binary doesn't support, use the fat-jar:
 
 ```bash
 java -jar target/ofd-cli.jar to-html invoice.ofd -o out.html
+java -jar target/ofd-cli.jar sign input.ofd -p12 cert.p12 -P pwd -o signed.ofd
 ```
+
+The CLI's own `--help` footer lists the distribution split so users
+discover it without reading this README.
 
 ## Font Setup
 
@@ -255,7 +257,7 @@ Two test layers:
 # Unit tests (JUnit 5, fast)
 mvn -o test
 
-# Integration tests (39 cases, both fat-jar and native)
+# Integration tests (39 cases per mode, 78 total)
 ./src/test/scripts/run-tests.sh -m jar
 ./src/test/scripts/run-tests.sh -m native
 ```

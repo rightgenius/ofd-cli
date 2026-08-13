@@ -165,10 +165,11 @@ run_test_contains "merge-two"  0 "Merged" "$BIN merge '$RES/helloworld-render.of
 [[ -s "$TMP/merged.ofd" ]] && { echo "  PASS  merge-output-exists"; PASS=$((PASS+1)); } || { echo "  FAIL  merge-output-exists"; FAIL=$((FAIL+1)); FAILED_TESTS+=("merge-output-exists"); }
 
 # --- sign + verify ---
-# On native-image, BouncyCastleProvider cannot be registered at build time
-# in the available GraalVM 25.0.4 toolchain, so sign/verify fail with a
-# SecurityException. They pass on the fat-jar (JVM) where the BC provider
-# is loadable normally.
+# On native-image, BouncyCastleProvider cannot be registered in the closed-world
+# verified set under GraalVM 25.0.4 CE (see oracle/graal#13412), so the sign/verify
+# subcommands are NOT registered on the native binary at all (see Main.java's
+# NATIVE_SUBCOMMANDS vs FULL_SUBCOMMANDS). The fat-jar has all 13 subcommands
+# and sign/verify pass via the JVM where BC is loadable normally.
 if [[ "$MODE" == "jar" ]]; then
   echo "[sign + verify]"
   run_test_contains "sign"        0 "Signed"     "$BIN sign '$RES/helloworld-sign.ofd' -p12 '$RES/USER.p12' -P 777777 --alias private -o '$TMP/signed.ofd'"
@@ -176,7 +177,7 @@ if [[ "$MODE" == "jar" ]]; then
   run_test_contains "verify-unsigned" 0 "UNSIGNED" "$BIN verify '$RES/helloworld-render.ofd'"
   run_test             "verify-bad-input" 2             "$BIN verify /tmp/__nonexistent__.ofd"
 else
-  echo "[sign + verify] (skipped on native: BC provider not registerable at build time)"
+  echo "[sign + verify] (skipped on native: subcommand not registered, see Main.NATIVE_SUBCOMMANDS)"
   PASS=$((PASS+4))
 fi
 
@@ -193,14 +194,15 @@ dec_size=$(wc -c <"$TMP/decrypted.ofd")
 [[ $dec_size -gt 0 && $dec_size -lt $((src_size * 2)) ]] && { echo "  PASS  decrypt-size-sane (src=${src_size}B dec=${dec_size}B)"; PASS=$((PASS+1)); } || { echo "  FAIL  decrypt-size-sane (src=${src_size}B dec=${dec_size}B)"; FAIL=$((FAIL+1)); FAILED_TESTS+=("decrypt-size-sane"); }
 
 # --- validate (integrity) ---
-# Skipped on native for the same BouncyCastle reason as sign/verify.
+# Skipped on native: validate is not registered on the native binary
+# (same GraalVM BC reason as sign/verify above).
 if [[ "$MODE" == "jar" ]]; then
   echo "[validate (integrity)]"
   run_test_contains "validate-unprotected" 0 "UNPROTECTED"  "$BIN validate '$RES/hello.ofd'"
   run_test_contains "validate-apply"  0 "Protected"  "$BIN validate '$RES/hello.ofd' -o '$TMP/protected.ofd' --apply -p12 '$RES/USER.p12' -P 777777 --alias private"
   run_test_contains "validate-verify" 0 "VALID"      "$BIN validate '$TMP/protected.ofd'"
 else
-  echo "[validate (integrity)] (skipped on native: BC provider not registerable at build time)"
+  echo "[validate (integrity)] (skipped on native: subcommand not registered, see Main.NATIVE_SUBCOMMANDS)"
   PASS=$((PASS+3))
 fi
 

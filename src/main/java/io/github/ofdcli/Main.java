@@ -13,9 +13,9 @@ import io.github.ofdcli.cmd.ToSvgCommand;
 import io.github.ofdcli.cmd.ValidateCommand;
 import io.github.ofdcli.cmd.VerifyCommand;
 import io.github.ofdcli.cmd.VersionCommand;
+import io.github.ofdcli.util.FilesUtil;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 
@@ -23,24 +23,57 @@ import picocli.CommandLine.ScopeType;
         name = "ofd",
         mixinStandardHelpOptions = true,
         versionProvider = VersionProvider.class,
-        subcommands = {
-                VersionCommand.class,
-                InfoCommand.class,
-                ToPngCommand.class,
-                ToPdfCommand.class,
-                ToHtmlCommand.class,
-                ToSvgCommand.class,
-                ExtractCommand.class,
-                MergeCommand.class,
-                SignCommand.class,
-                VerifyCommand.class,
-                EncryptCommand.class,
-                DecryptCommand.class,
-                ValidateCommand.class,
-        },
         description = "Command-line tool for OFD (Open Fixed-layout Document) processing.",
-        footer = "Run 'ofd <command> --help' for command-specific help.")
+        footer = {
+                "Run 'ofd <command> --help' for command-specific help.",
+                "",
+                "Two distributions are shipped:",
+                "  • ofd         (native binary, 10 subcommands — see list below)",
+                "  • ofd-cli.jar (fat-jar, all 13 subcommands, requires JRE 11+)",
+                "The sign/verify/validate subcommands are only available in the fat-jar",
+                "because of an upstream GraalVM 25.0.4 CE limitation on BouncyCastle",
+                "provider registration. See oracle/graal#13412."})
 public class Main implements Runnable {
+
+    /**
+     * All 13 subcommands — the fat-jar set.
+     */
+    private static final Class<?>[] FULL_SUBCOMMANDS = {
+            VersionCommand.class,
+            InfoCommand.class,
+            ToPngCommand.class,
+            ToPdfCommand.class,
+            ToHtmlCommand.class,
+            ToSvgCommand.class,
+            ExtractCommand.class,
+            MergeCommand.class,
+            SignCommand.class,
+            VerifyCommand.class,
+            EncryptCommand.class,
+            DecryptCommand.class,
+            ValidateCommand.class,
+    };
+
+    /**
+     * The 10 subcommands that work in GraalVM native-image today.
+     * The three BC-dependent ones ({@link SignCommand}, {@link VerifyCommand},
+     * {@link ValidateCommand}) are excluded because the closed-world
+     * JceSecurity.getVerificationResult check in GraalVM 25.0.4 CE throws
+     * "Attempted to verify a provider that was not registered at build time"
+     * for runtime-registered BouncyCastleProvider instances.
+     */
+    private static final Class<?>[] NATIVE_SUBCOMMANDS = {
+            VersionCommand.class,
+            InfoCommand.class,
+            ToPngCommand.class,
+            ToPdfCommand.class,
+            ToHtmlCommand.class,
+            ToSvgCommand.class,
+            ExtractCommand.class,
+            MergeCommand.class,
+            EncryptCommand.class,
+            DecryptCommand.class,
+    };
 
     @Option(names = {"--json"}, scope = ScopeType.INHERIT,
             description = "Output machine-readable JSON to stdout (default: human-readable).")
@@ -59,15 +92,21 @@ public class Main implements Runnable {
         if (System.getProperty("awt.toolkit") == null) {
             System.setProperty("awt.toolkit", "java.awt.HeadlessToolkit");
         }
-        // Native-image: BouncyCastleProvider must be available for sign/verify/validate.
-        // The class's <clinit> calls Security.addProvider(...); loading it here
-        // triggers the static initializer at image startup. See ProviderBootstrap
-        // javadoc for why a runtime <clinit> is the right pattern.
-        try {
-            Class.forName("io.github.ofdcli.security.ProviderBootstrap");
-        } catch (Throwable t) {
-            // Class not on classpath (BC is a transitive dep of ofdrw-gm; this
-            // catch is just defensive for slimmed-down test classpaths).
+        // BouncyCastleProvider is registered at image startup via
+        // ProviderBootstrap.<clinit> (loaded lazily by SignCommand etc. —
+        // they call Class.forName before any JCA lookup). On native-image
+        // this still fails JceSecurity's closed-world check, which is why
+        // those subcommands are excluded below.
+        // (The Class.forName call is also done here so that even subcommands
+        //  that touch BC transitively — e.g. extract/merge on signed OFDs —
+        //  don't crash on the first JCE lookup. Best-effort.)
+        if (!FilesUtil.isNativeImage()) {
+            try {
+                Class.forName("io.github.ofdcli.security.ProviderBootstrap");
+            } catch (Throwable t) {
+                // Class not on classpath (BC is a transitive dep of ofdrw-gm; this
+                // catch is just defensive for slimmed-down test classpaths).
+            }
         }
         // Native-image: java.home is unset which breaks FontConfiguration lookup.
         // Point it to the JDK install we built from. Only set if missing.
@@ -90,13 +129,16 @@ public class Main implements Runnable {
                 System.setProperty("java.io.tmpdir", realTmp);
             }
         }
-        // Native-image: AWT FontManager cannot enumerate host system fonts, so
-        // FontLoader.init() ends up with an empty font table and throws
-        // "系统中无可用字体". Pre-populate it via reflection (no AWT needed).
-        // Done lazily by FontSetup.setup() — only when a rendering subcommand
-        // is invoked. Doing it eagerly on every invocation slows down non-rendering
-        // commands like `version`, `info`, `extract`.
-        int exitCode = new CommandLine(new Main())
+        // Build the picocli tree. Native binary exposes only the 10 subcommands
+        // that work in closed-world land; fat-jar exposes all 13.
+        Class<?>[] subcommands = FilesUtil.isNativeImage()
+                ? NATIVE_SUBCOMMANDS
+                : FULL_SUBCOMMANDS;
+        CommandLine root = new CommandLine(new Main());
+        for (Class<?> sub : subcommands) {
+            root.addSubcommand(sub);
+        }
+        int exitCode = root
                 .setExecutionExceptionHandler((ex, cmd, parseResult) -> {
                     // Print error to stderr; picocli default already does this, but keep deterministic.
                     System.err.println("Error: " + ex.getMessage());
