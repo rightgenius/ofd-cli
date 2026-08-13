@@ -89,7 +89,8 @@ jobs:
         uses: graalvm/setup-graalvm@v1
         with:
           distribution: 'graalvm-community'
-          java-version: '21.0.2'
+          java-version: 'graal-25.2.4'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           components: 'native-image'
 
       - name: Cache Maven packages
@@ -202,7 +203,8 @@ jobs:
         uses: graalvm/setup-graalvm@v1
         with:
           distribution: 'graalvm-community'
-          java-version: '21.0.2'
+          java-version: 'graal-25.2.4'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           components: 'native-image'
 
       - name: Install basic CJK fonts (for native-image FontLoader scan)
