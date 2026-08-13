@@ -62,6 +62,17 @@ jobs:
       - name: Rename binary with platform suffix (avoid name collision on release)
         run: mv target/ofd target/ofd-darwin-arm64
 
+      - name: Stage dylibs (libawt.dylib, libfontmanager.dylib, etc.) alongside binary
+        run: |
+          # native-image leaves lib*.dylib siblings of the binary in target/.
+          # These are loaded at runtime via System.loadLibrary(); the macOS
+          # loader only finds them in the binary's own directory.
+          # Copy them into target/ofd-darwin-arm64/ so they ship together.
+          mkdir -p target/ofd-darwin-arm64
+          cp target/lib*.dylib target/ofd-darwin-arm64/ 2>/dev/null || \
+            (echo "WARN: no lib*.dylib found in target/"; exit 1)
+          ls -la target/ofd-darwin-arm64/
+
       - name: Upload native artifact
         uses: actions/upload-artifact@v4
         with:
@@ -122,6 +133,15 @@ jobs:
       - name: Rename binary with platform suffix (avoid name collision on release)
         run: mv target/ofd target/ofd-linux-x64
 
+      - name: Stage dylibs alongside binary
+        run: |
+          # native-image leaves lib*.so siblings of the binary in target/.
+          # These are loaded at runtime via System.loadLibrary().
+          # Copy them into target/ofd-linux-x64/ so they ship together.
+          mkdir -p target/ofd-linux-x64
+          cp target/lib*.so target/ofd-linux-x64/ 2>/dev/null || true
+          ls -la target/ofd-linux-x64/
+
       - name: Upload native artifact
         uses: actions/upload-artifact@v4
         with:
@@ -145,8 +165,10 @@ jobs:
       - name: Show what we got
         run: |
           ls -lh dist/
-          file dist/ofd-darwin-arm64/ofd 2>/dev/null || true
-          file dist/ofd-linux-x64/ofd    2>/dev/null || true
+          echo "---"
+          ls -lh dist/ofd-darwin-arm64/
+          file dist/ofd-darwin-arm64/ofd-darwin-arm64 2>/dev/null || true
+          file dist/ofd-linux-x64/ofd-linux-x64    2>/dev/null || true
 
       - name: Generate checksums (basename only — install.sh greps by name)
         working-directory: dist
@@ -167,8 +189,23 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+          # Note: libawt.dylib, libfontmanager.dylib etc. are uploaded as
+          # separate assets because the native binary calls
+          # System.loadLibrary("awt") etc. at runtime and macOS's loader
+          # only finds them via LC_LOAD_DYLIB in the binary's own directory.
+          # install.sh downloads them alongside ofd and chmods them.
           files: |
             dist/ofd-darwin-arm64/ofd-darwin-arm64
+            dist/ofd-darwin-arm64/libawt.dylib
+            dist/ofd-darwin-arm64/libawt_lwawt.dylib
+            dist/ofd-darwin-arm64/libfontmanager.dylib
+            dist/ofd-darwin-arm64/libfreetype.dylib
+            dist/ofd-darwin-arm64/libjava.dylib
+            dist/ofd-darwin-arm64/libjavajpeg.dylib
+            dist/ofd-darwin-arm64/libjvm.dylib
+            dist/ofd-darwin-arm64/liblcms.dylib
+            dist/ofd-darwin-arm64/libmlib_image.dylib
+            dist/ofd-darwin-arm64/libosxapp.dylib
             dist/ofd-linux-x64/ofd-linux-x64
             dist/ofd-cli-jar/ofd-cli.jar
             dist/SHA256SUMS

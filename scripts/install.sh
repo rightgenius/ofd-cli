@@ -105,6 +105,39 @@ fi
 echo "→ Checksum OK"
 
 # ---------------------------------------------------------------------------
+# 4b. Download + verify native dylibs (libawt.dylib etc.) that the binary
+#     loads at runtime via System.loadLibrary("awt"). The macOS/Linux loader
+#     only finds them in the binary's own directory, so they must be
+#     co-located with `ofd`. Without them, image-rendering subcommands
+#     (to-png and to-pdf on OFDs with embedded images) crash with
+#     "UnsatisfiedLinkError: Can't load library: awt".
+# ---------------------------------------------------------------------------
+
+DYLIB_PATTERN='^lib[a-zA-Z][a-zA-Z0-9_]*\.(dylib|so)$'
+DYLIB_NAMES=$(grep -E "${DYLIB_PATTERN}" "${TMPDIR}/SHA256SUMS" | awk '{print $2}')
+
+if [[ -z "${DYLIB_NAMES}" ]]; then
+    echo "WARN: no dylibs found in SHA256SUMS — image-rendering subcommands" \
+         "will fail at runtime. (Only ${ASSET_NAME} is platform-specific" \
+         "to this download; the dylib list is small.)" >&2
+else
+    echo "→ Downloading $(echo "${DYLIB_NAMES}" | wc -l | tr -d ' ') dylib(s)..."
+    for dylib in ${DYLIB_NAMES}; do
+        curl -fsSL -o "${TMPDIR}/${dylib}" "${BASE_URL}/${dylib}"
+        # Verify each dylib against SHA256SUMS
+        EXPECTED=$(grep -E "[[:space:]]${dylib}\$" "${TMPDIR}/SHA256SUMS" | awk '{print $1}')
+        ACTUAL=$(sha256sum "${TMPDIR}/${dylib}" | awk '{print $1}')
+        if [[ "${EXPECTED}" != "${ACTUAL}" ]]; then
+            echo "Dylib checksum mismatch for ${dylib}!" >&2
+            echo "  expected: ${EXPECTED}" >&2
+            echo "  actual:   ${ACTUAL}" >&2
+            exit 1
+        fi
+    done
+    echo "→ Dylib checksums OK"
+fi
+
+# ---------------------------------------------------------------------------
 # 5. Install
 # ---------------------------------------------------------------------------
 
@@ -130,6 +163,17 @@ else
 fi
 
 echo "→ Installed to ${DEST}/${BINARY_NAME}"
+
+# Install dylibs alongside the binary (co-location is required for
+# System.loadLibrary to find them at runtime).
+if [[ -n "${DYLIB_NAMES:-}" ]]; then
+    for dylib in ${DYLIB_NAMES}; do
+        if [[ -f "${TMPDIR}/${dylib}" ]]; then
+            mv "${TMPDIR}/${dylib}" "${DEST}/${dylib}"
+        fi
+    done
+    echo "→ Installed $(echo "${DYLIB_NAMES}" | wc -l | tr -d ' ') dylib(s) to ${DEST}/"
+fi
 
 # ---------------------------------------------------------------------------
 # 6. Verify
