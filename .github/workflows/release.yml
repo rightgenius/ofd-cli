@@ -96,21 +96,20 @@ jobs:
           # graal-25.2.4 (tagged with JDK level 25.0.4) fixes both. Pull
           # the tarball directly to avoid fighting setup-graalvm's
           # release-list resolution.
+          GRAAL_ROOT=/tmp/graalvm-install
+          mkdir -p "$GRAAL_ROOT"
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             ASSET="graalvm-community-jdk-25i2-25.0.4_macos-aarch64_bin.tar.gz"
+            JAVA_HOME="$GRAAL_ROOT/graalvm-community-openjdk-25.0.4+10.1/Contents/Home"
           else
             ASSET="graalvm-community-jdk-25i2-25.0.4_linux-x64_bin.tar.gz"
+            JAVA_HOME="$GRAAL_ROOT/graalvm-community-openjdk-25.0.4+10.1"
           fi
           echo "→ Downloading GraalVM $ASSET"
           curl -fsSL -o /tmp/graal.tar.gz \
             "https://github.com/graalvm/graalvm-ce-builds/releases/download/graal-25.2.4/$ASSET"
-          mkdir -p "$HOME/graalvm"
-          tar -xzf /tmp/graal.tar.gz -C "$HOME/graalvm"
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            echo "JAVA_HOME=$HOME/graalvm/graalvm-community-openjdk-25.0.4+10.1/Contents/Home" >> $GITHUB_ENV
-          else
-            echo "JAVA_HOME=$HOME/graalvm/graalvm-community-openjdk-25.0.4+10.1" >> $GITHUB_ENV
-          fi
+          tar -xzf /tmp/graal.tar.gz -C "$GRAAL_ROOT"
+          echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
           echo "PATH=$JAVA_HOME/bin:$PATH" >> $GITHUB_ENV
           echo "→ Installed GraalVM at $JAVA_HOME"
           "$JAVA_HOME/bin/java" -version
@@ -238,21 +237,20 @@ jobs:
       - name: Set up GraalVM JDK 25
         run: |
           # See macOS job for full comment; same setup here.
+          GRAAL_ROOT=/tmp/graalvm-install
+          mkdir -p "$GRAAL_ROOT"
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             ASSET="graalvm-community-jdk-25i2-25.0.4_macos-aarch64_bin.tar.gz"
+            JAVA_HOME="$GRAAL_ROOT/graalvm-community-openjdk-25.0.4+10.1/Contents/Home"
           else
             ASSET="graalvm-community-jdk-25i2-25.0.4_linux-x64_bin.tar.gz"
+            JAVA_HOME="$GRAAL_ROOT/graalvm-community-openjdk-25.0.4+10.1"
           fi
           echo "→ Downloading GraalVM $ASSET"
           curl -fsSL -o /tmp/graal.tar.gz \
             "https://github.com/graalvm/graalvm-ce-builds/releases/download/graal-25.2.4/$ASSET"
-          mkdir -p "$HOME/graalvm"
-          tar -xzf /tmp/graal.tar.gz -C "$HOME/graalvm"
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            echo "JAVA_HOME=$HOME/graalvm/graalvm-community-openjdk-25.0.4+10.1/Contents/Home" >> $GITHUB_ENV
-          else
-            echo "JAVA_HOME=$HOME/graalvm/graalvm-community-openjdk-25.0.4+10.1" >> $GITHUB_ENV
-          fi
+          tar -xzf /tmp/graal.tar.gz -C "$GRAAL_ROOT"
+          echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
           echo "PATH=$JAVA_HOME/bin:$PATH" >> $GITHUB_ENV
           "$JAVA_HOME/bin/java" -version
           "$JAVA_HOME/bin/native-image" --version
