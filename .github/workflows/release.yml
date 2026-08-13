@@ -130,6 +130,19 @@ jobs:
           mv target/ofd target/ofd-darwin-arm64/ofd-darwin-arm64
           shopt -s nullglob
           cp target/lib*.dylib target/ofd-darwin-arm64/ 2>/dev/null || true
+          # GraalVM 25.0.2 native-image on macOS arm64 doesn't emit lib*.dylib
+          # siblings, so we copy the runtime libs out of the JDK install that
+          # setup-graalvm prepared for us. Without these, the binary crashes
+          # with UnsatisfiedLinkError("No awt in java.library.path") at
+          # the first touch of any java.awt.Font / AWT class.
+          if compgen -G "$JAVA_HOME/lib/"*.dylib > /dev/null; then
+            cp "$JAVA_HOME/lib/"libawt.dylib "$JAVA_HOME/lib/"libawt_lwawt.dylib \
+               "$JAVA_HOME/lib/"libfontmanager.dylib "$JAVA_HOME/lib/"libfreetype.dylib \
+               "$JAVA_HOME/lib/"libjava.dylib "$JAVA_HOME/lib/"libjavajpeg.dylib \
+               "$JAVA_HOME/lib/"libjvm.dylib "$JAVA_HOME/lib/"liblcms.dylib \
+               "$JAVA_HOME/lib/"libmlib_image.dylib "$JAVA_HOME/lib/"libosxapp.dylib \
+               target/ofd-darwin-arm64/ 2>/dev/null || true
+          fi
           ls -la target/ofd-darwin-arm64/
 
       - name: Upload native artifact
