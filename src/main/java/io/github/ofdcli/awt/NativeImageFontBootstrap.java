@@ -230,13 +230,15 @@ public final class NativeImageFontBootstrap {
                     // .ttf is much simpler and more reliable.
                     boolean isCollection = name.endsWith(".ttc");
                     byte[] buf;
-                    TrueTypeFont ttf;
-                    try {
-                        buf = Files.readAllBytes(p);
-                        ttf = new TrueTypeFont().parse(buf);
-                        if (ttf == null) continue;
-                    } catch (Exception e) {
-                        continue;
+                    TrueTypeFont ttf = null;
+                    if (!isCollection) {
+                        try {
+                            buf = Files.readAllBytes(p);
+                            ttf = new TrueTypeFont().parse(buf);
+                            if (ttf == null) continue;
+                        } catch (Exception e) {
+                            continue;
+                        }
                     }
                     // Copy file into our font dir so loadAsDefaultFont's
                     // Files.newInputStream can find it later.  CRITICAL: keep
@@ -294,13 +296,22 @@ public final class NativeImageFontBootstrap {
 
         // Now: pick firstFont by priority.  Walk FIRST_FONT_PREFERENCE in
         // order; the first match against any candidate's basename wins.
-        // Standalone TTFs are preferred over TTCs (TTCs need a sub-font
-        // name to extract, and OpenPdfMaker will probably pick the wrong
-        // one without a fontname hint).
+        // We search standalone TTFs first, then TTCs — the
+        // 2.4.0-openpdf.2 fork taught OpenPdfMaker to handle .ttc paths
+        // (appends ",0" for OpenPDF's TrueTypeCollection sub-font syntax),
+        // so a CJK TTC like Hiragino Sans GB.ttc is a great firstFont
+        // candidate and unlocks real CJK rendering on macOS.
         Path preferredFirst = null;
         for (String preferred : FIRST_FONT_PREFERENCE) {
             String needle = preferred.toLowerCase(Locale.ROOT);
             for (Path p : standaloneTtfs) {
+                if (p.getFileName().toString().toLowerCase(Locale.ROOT).contains(needle)) {
+                    preferredFirst = p;
+                    break;
+                }
+            }
+            if (preferredFirst != null) break;
+            for (Path p : collections) {
                 if (p.getFileName().toString().toLowerCase(Locale.ROOT).contains(needle)) {
                     preferredFirst = p;
                     break;

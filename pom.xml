@@ -6,7 +6,7 @@
 
     <groupId>io.github.ofdcli</groupId>
     <artifactId>ofd-cli</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
     <packaging>jar</packaging>
 
     <name>ofd-cli</name>
@@ -26,13 +26,15 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <picocli.version>4.7.6</picocli.version>
-        <!-- ofdrw fork: 2.4.0-openpdf.1 from rightgenius/ofdrw replaces
+        <!-- ofdrw fork: 2.4.0-openpdf.2 from rightgenius/ofdrw replaces
              PDFBox with OpenPDF in the OFD→PDF exporter (PDFExporterOpenPDF),
              making to-pdf work in GraalVM native-image. PDF→OFD is broken
              in this variant (PDFConverter is a stub).
-             Sourced via JitPack (com.github.rightgenius:ofdrw-full:2.4.0-openpdf.1)
-             so the CI can resolve the dependency without manually mvn install. -->
-        <ofdrw.version>2.4.0-openpdf.1</ofdrw.version>
+             Sourced via JitPack (com.github.rightgenius:ofdrw-full:2.4.0-openpdf.2)
+             so the CI can resolve the dependency without manually mvn install.
+             v2.4.0-openpdf.2 adds TTC font path support + macOS CJK aliases
+             so embedded CJK (e.g. 发票示例.ofd) renders properly on macOS. -->
+        <ofdrw.version>2.4.0-openpdf.2</ofdrw.version>
         <jackson.version>2.16.1</jackson.version>
 
         <native.maven.plugin.version>0.10.2</native.maven.plugin.version>
@@ -65,7 +67,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- ofdrw 2.4.0-openpdf.1 (PDFBox -> OpenPDF fork) via JitPack.
+        <!-- ofdrw 2.4.0-openpdf.2 (PDFBox -> OpenPDF fork) via JitPack.
              The fork at github.com/rightgenius/ofdrw is built on demand by
              jitpack.io. Use groupId 'com.github.rightgenius' instead of
              'org.ofdrw' so JitPack serves it. -->
