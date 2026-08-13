@@ -89,7 +89,7 @@ jobs:
         uses: graalvm/setup-graalvm@main
         with:
           distribution: 'graalvm-community'
-          java-version: 'graal-25.2.4'
+          java-version: '25.2.4'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           components: 'native-image'
 
@@ -203,7 +203,7 @@ jobs:
         uses: graalvm/setup-graalvm@main
         with:
           distribution: 'graalvm-community'
-          java-version: 'graal-25.2.4'
+          java-version: '25.2.4'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           components: 'native-image'
 
