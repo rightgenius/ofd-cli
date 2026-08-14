@@ -2821,30 +2821,6 @@
     "allDeclaredConstructors": true
   },
 
-  // ============================================================
-  // BC lightweight crypto API — added in ofd-cli v0.2.0 /
-  // ofdrw 2.4.0-openpdf.5 to support verify / validate in
-  // GraalVM native-image without registering BouncyCastleProvider.
-  //
-  // GmVerifyHelper in ofdrw-gm uses:
-  //   - org.bouncycastle.crypto.signers.SM2Signer (new + init + update + verifySignature)
-  //   - org.bouncycastle.crypto.digests.SM3Digest (new + update + doFinal)
-  //   - org.bouncycastle.crypto.params.ECPublicKeyParameters (cast from PublicKeyFactory)
-  //   - org.bouncycastle.crypto.util.PublicKeyFactory (createKey(SubjectPublicKeyInfo))
-  //   - org.bouncycastle.cert.X509CertificateHolder (CertTools.objHolder)
-  //
-  // PublicKeyFactory.createKey internally reflects on ASN.1 tag tables,
-  // so we also pin the BC ASN.1 helpers it walks through.
-  // These are *not* picked up by the existing agent capture (which ran
-  // against the JCE-based verify path) — they have to be added by hand.
-  //
-  // TODO: re-run native-image-agent against the new verify/validate
-  // path on fat-jar and merge the captured metadata into the
-  // agent-capture/reachability-metadata.json — this hand-rolled block
-  // is a starting point, not a complete fix.
-  // ============================================================
-
-  // --- GmVerifyHelper direct call sites ---
   {
     "name": "org.bouncycastle.crypto.signers.SM2Signer",
     "allDeclaredConstructors": true,
@@ -2886,7 +2862,6 @@
     "allPublicMethods": true
   },
 
-  // --- CertTools.objHolder (returns X509CertificateHolder) ---
   {
     "name": "org.bouncycastle.cert.X509CertificateHolder",
     "allDeclaredConstructors": true,
@@ -2898,7 +2873,6 @@
     "allPublicMethods": true
   },
 
-  // --- ASN.1 types that PublicKeyFactory.createKey walks through ---
   {
     "name": "org.bouncycastle.asn1.x509.SubjectPublicKeyInfo",
     "allDeclaredConstructors": true,
@@ -2985,7 +2959,6 @@
     "allPublicMethods": true
   },
 
-  // --- BC math/curves used by ECPublicKeyParameters / SM2Signer ---
   {
     "name": "org.bouncycastle.math.ec.ECPoint",
     "allDeclaredConstructors": true,

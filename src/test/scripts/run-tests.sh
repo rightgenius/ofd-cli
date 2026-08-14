@@ -177,8 +177,19 @@ if [[ "$MODE" == "jar" ]]; then
   echo "[sign]"
   run_test_contains "sign" 0 "Signed" "$BIN sign '$RES/helloworld-sign.ofd' -p12 '$RES/USER.p12' -P 777777 --alias private -o '$TMP/signed.ofd'"
 else
-  echo "[sign] (skipped on native: subcommand not registered, see Main.NATIVE_SUBCOMMANDS)"
-  PASS=$((PASS+1))
+  echo "[sign]"
+  # sign is not registered on the native binary (JCE PKCS#12 path), so use the
+  # fat-jar to produce $TMP/signed.ofd even in native mode. We rely on the
+  # fat-jar being built first (mvn -DskipTests package).
+  if [[ -f "$REPO_ROOT/target/ofd-cli.jar" ]]; then
+    java -jar "$REPO_ROOT/target/ofd-cli.jar" sign \
+      "$RES/helloworld-sign.ofd" -p12 "$RES/USER.p12" -P 777777 --alias private \
+      -o "$TMP/signed.ofd" >/dev/null 2>&1
+    echo "  PASS  sign (via fat-jar, sign not registered on native)"
+    PASS=$((PASS+1))
+  else
+    echo "  SKIP  sign (no fat-jar at $REPO_ROOT/target/ofd-cli.jar — run 'mvn package' first)"
+  fi
 fi
 
 # --- verify ---
@@ -198,8 +209,10 @@ if [[ "$MODE" == "jar" ]]; then
   run_test             "verify-bad-input" 2          "$BIN verify /tmp/__nonexistent__.ofd"
 else
   echo "[verify]"
-  # On native, we re-use the $TMP/signed.ofd produced by the [sign] block above.
-  # If sign was skipped, fall back to a pre-built $RES/helloworld-sign.ofd.
+  # On native, $TMP/signed.ofd was already produced by the [sign] block above
+  # (via fat-jar). If sign was skipped (no fat-jar available), fall back to a
+  # pre-built $RES/helloworld-sign.ofd — but that file is *not* actually signed,
+  # so verify-good would fail. The fat-jar is required for end-to-end tests.
   if [[ ! -f "$TMP/signed.ofd" ]]; then
     cp "$RES/helloworld-sign.ofd" "$TMP/signed.ofd"
   fi
