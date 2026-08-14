@@ -1,13 +1,13 @@
 # ofd-cli
 
-> **OFD**（Open Fixed-layout Document，**版式文档**）命令行工具，基于 [ofdrw/ofdrw](https://github.com/ofdrw/ofdrw)（Apache 2.0 原版）封装，PDF 渲染底座改用 [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) 的 OpenPDF fork 以兼容 GraalVM native-image。
+> **OFD**（Open Fixed-layout Document，**版式文档**）命令行工具，基于 [ofdrw/ofdrw](https://github.com/ofdrw/ofdrw)（Apache 2.0 原版）封装，**PDF 渲染 + 国密签名/加密** 改用 [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) 的 fork（`ofdrw-converter` 切 OpenPDF，`ofdrw-gm` / `ofdrw-sign` / `ofdrw-crypto` 把 JCE 迁到 BC 轻量级 crypto API）以兼容 GraalVM native-image。
 > 专为 **AI Agent** 与**自动化流水线**设计：单文件静态二进制、标准化退出码、JSON 输出。
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/rightgenius/ofd-cli/ci.yml?branch=main&label=CI)](https://github.com/rightgenius/ofd-cli/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/rightgenius/ofd-cli?label=release)](https://github.com/rightgenius/ofd-cli/releases/latest)
 [![Java 11+](https://img.shields.io/badge/Java-11%2B-orange.svg)](https://adoptium.net/)
-[![Native binary](https://img.shields.io/badge/native--image-58MB-success.svg)](https://www.graalvm.org/native-image/)
+[![Native binary](https://img.shields.io/badge/native--image-53MB-success.svg)](https://www.graalvm.org/native-image/)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](#)
 
 ---
@@ -18,7 +18,11 @@
 
 由于原版 `ofdrw/ofdrw` 的 PDF 渲染依赖 Apache PDFBox，PDFBox 在静态初始化时触发 `java.awt.image.ColorModel` → `Toolkit.<clinit>` → `System.loadLibrary("awt")`，在 GraalVM native-image 的 closed-world substrate VM 里没有 `libawt.dylib` 可加载，native binary 跑 `to-pdf` 直接 SIGABRT。
 
-为支持 native-image，本项目改用 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw) —— `ofdrw/ofdrw` 的 fork，把 PDF 底座从 PDFBox 切到 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF)（LGPL/MPL，可商用）并修了几处 GraalVM 兼容问题。详见 [上游](#上游) 段。
+为支持 native-image，本项目改用 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw) —— `ofdrw/ofdrw` 的 fork。两类 GraalVM 兼容问题都在 fork 里修了：
+- **PDF 渲染**：`ofdrw-converter` 把 PDFBox 切到 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF)（LGPL/MPL，可商用），绕开 AWT `libawt.dylib` 加载
+- **国密签名 / 加密**：`ofdrw-gm` / `ofdrw-sign` / `ofdrw-crypto` 把 JCE provider API（`Signature.getInstance("SM3WithSM2", "BC")` / `KeyStore.getInstance("PKCS12", "BC")`）迁到 BC 轻量级 crypto API（`SM2Signer` / `SM3Digest` / `PKCS12PfxPdu` + `BcPKCS12PBEInputDecryptorProviderBuilder`），让 `sign` / `verify` / `validate`（读 + 写）都能在 native binary 跑
+
+详见 [上游](#上游) 段。
 
 它解决三件事：
 
@@ -208,7 +212,7 @@ ofd to-png invoice.ofd --no-default-fonts            # 跳过系统字体扫描
 
 ### `to-pdf <file> -o <out.pdf>`
 
-渲染为 PDF。PDF 渲染基于 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw) 的 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF) fork（**LGPL/MPL**，可商用），native-image 下不再触发 AWT FontManager JNI 失败，**macOS 中文 / 拉丁混排正常渲染**（TTC 字体自动加 `,0` sub-font 语法）。OFD 解析等其他部分仍用原版 [ofdrw/ofdrw](https://github.com/ofdrw/ofdrw)。
+渲染为 PDF。PDF 渲染基于 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw) 的 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF) fork（**LGPL/MPL**，可商用），native-image 下不再触发 AWT FontManager JNI 失败，**macOS 中文 / 拉丁混排正常渲染**（TTC 字体自动加 `,0` sub-font 语法）。`sign` / `verify` / `validate` 也走这个 fork 的 `ofdrw-gm` / `ofdrw-sign` / `ofdrw-crypto` 三个子模块（BC 轻量级实现）。OFD 解析 / 排版等其他部分仍用原版 [ofdrw/ofdrw](https://github.com/ofdrw/ofdrw)。
 
 ```bash
 ofd to-pdf invoice.ofd -o out/invoice.pdf
@@ -512,24 +516,26 @@ native binary 子命令数：**8 → 11**（加了 sign / verify / validate）�
 
 ### 为什么还有一个 `rightgenius/ofdrw`
 
-`ofdrw/ofdrw` 的 PDF 渲染依赖 Apache PDFBox，PDFBox 在 GraalVM native-image 下不可用（见上文）。所以**本项目额外维护了一个 fork**：
+`ofdrw/ofdrw` 的两个能力在 GraalVM native-image 下不可用（见上文）：一是 PDF 渲染（PDFBox 触发 AWT JNI），二是国密签名 / 加密（JCE `Signature.getInstance("SM3WithSM2", "BC")` 触发 `JceSecurity.canUseProvider` 校验失败）。所以**本项目额外维护了一个 fork**：
 
 - **GraalVM 兼容 fork**：[rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) — `feature/openpdf-replacement` 分支，Apache 2.0
-- **用途**：本项目只依赖此 fork 的 `ofdrw-converter` 渲染 PDF；其他子模块（`ofdrw-crypto` / `ofdrw-gm` / `ofdrw-sign` / `ofdrw-layout` …）仍用原版 `ofdrw/ofdrw`
+- **用途**：本项目只依赖此 fork 的 4 个子模块 —— `ofdrw-converter`（PDF 渲染）+ `ofdrw-gm` / `ofdrw-sign` / `ofdrw-crypto`（国密签名加密的 BC 轻量级实现）；其他子模块（`ofdrw-core` / `ofdrw-pkg` / `ofdrw-layout` …）仍用原版 `ofdrw/ofdrw`
 
 ### `rightgenius/ofdrw` 相对原版改了哪些
 
-相对于 `ofdrw/ofdrw` 的 commit `7df66b68` 之后的所有改动都集中在 `ofdrw-converter`（PDF 渲染层），按重要性排序：
+相对于 `ofdrw/ofdrw` 的 commit `7df66b68` 之后的所有改动，按重要性排序：
 
 | 改动 | 类别 | 解决的问题 |
 |---|---|---|
 | **PDFBox → OpenPDF 1.3.39** | 主要 | PDFBox `PDDocument.<clinit>` 在 native-image 触发 AWT `UnsatisfiedLinkError`；OpenPDF 是纯 Java fork，无 native 依赖 |
+| **国密签名 / 加密从 JCE 迁到 BC 轻量级 crypto API** | 主要 | JCE `Signature.getInstance("SM3WithSM2", "BC")` / `KeyStore.getInstance("PKCS12", "BC")` 触发 GraalVM closed-world `JceSecurity.canUseProvider` 校验失败（[oracle/graal#13412](https://github.com/oracle/graal/issues/13412)）；fork 改成 `SM2Signer` + `ECPublicKeyParameters` / `ECPrivateKeyParameters` 走 BC 轻量级 crypto 路径，让 `sign` / `verify` / `validate` 在 native binary 都能跑 |
+| **`OFDValidator` 接受 SM3 OID `1.2.156.10197.1.401`** | 重要 | 真实 OFD（数科电子发票、z 科 SDK 签的）`Signature.xml` 写的是 SM3 OID 不是字符串 `"SM3"`，老代码只匹配字符串会误报"不支持的杂凑算法" |
 | **OpenPDF `Image` SMask BC 默认黑底** → 用 explicit `/Mask` 替换 | 主要 | 真实 OFD 平台生成的电子发票带 alpha 通道图，OpenPDF 1.3.39 把 alpha 透明区默认填成黑色；改用 PDF spec 推荐的 explicit `/Mask` 方案，印章 alpha 透出底层红字 |
 | **OpenPDF `clip()` 不重置 current path** → `clip()` 后立刻 `newPath()` | 重要 | PDF spec 8.5.4 要求 W 算子消耗 path；OpenPDF 不重置，导致字符 path 跟 page rect 走 non-zero winding 抵消，字符被裁 |
 | **TTC 字体路径加 `,0` sub-font 后缀** | 重要 | macOS 中文 CJK 字体都是 TTC 集合（PingFang.ttc / STSong.ttc …），OpenPDF `TrueTypeCollection` 需要 `path,0` 语法，否则静默失败 → 中文渲染为空 |
 | **`org.ofdrw.gm.GmProviders`** 统一封装 BC provider 获取 | 次要 | 让应用层能用同一入口拿 provider，方便后续做 GraalVM 兼容层 |
 
-历史 tag：`v2.4.0-openpdf.1` / `.2` / `.3` / `.4`。详见 [rightgenius/ofdrw release 页](https://github.com/rightgenius/ofdrw/tags)。
+历史 tag：`v2.4.0-openpdf.1` / `.2` / `.3` / `.4` / `.5` / `.6` / `.7`（`.5` 起进入国密签名 BC 轻量级迁移阶段，`.7` 完成 `validate --apply` 的 `GMProtectSignerLight`）。详见 [rightgenius/ofdrw release 页](https://github.com/rightgenius/ofdrw/tags)。
 
 ### 在哪里报 bug
 
