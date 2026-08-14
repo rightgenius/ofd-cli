@@ -168,28 +168,21 @@ run_test_contains "merge-two"  0 "Merged" "$BIN merge '$RES/helloworld-render.of
 [[ -s "$TMP/merged.ofd" ]] && { echo "  PASS  merge-output-exists"; PASS=$((PASS+1)); } || { echo "  FAIL  merge-output-exists"; FAIL=$((FAIL+1)); FAILED_TESTS+=("merge-output-exists"); }
 
 # --- sign ---
-# On native-image, BouncyCastleProvider cannot be registered in the closed-world
-# verified set under GraalVM 25.0.4 CE (see oracle/graal#13412), so the sign
-# subcommand is NOT registered on the native binary (see Main.java's
-# NATIVE_SUBCOMMANDS vs FULL_SUBCOMMANDS). The fat-jar has all 13 subcommands
-# and sign passes via the JVM where BC is loadable normally.
+# Since ofd-cli v0.3.0 / ofdrw 2.4.0-openpdf.6, sign is registered on the
+# native binary too — ofdrw-gm migrated PKCS#12 keystore loading + SM2 signing
+# to BC's lightweight crypto API (PKCS12ToolsLight + GBT35275DSContainerLight),
+# so the closed-world JceSecurity.canUseProvider check no longer fires.
 if [[ "$MODE" == "jar" ]]; then
   echo "[sign]"
   run_test_contains "sign" 0 "Signed" "$BIN sign '$RES/helloworld-sign.ofd' -p12 '$RES/USER.p12' -P 777777 --alias private -o '$TMP/signed.ofd'"
 else
   echo "[sign]"
-  # sign is not registered on the native binary (JCE PKCS#12 path), so use the
-  # fat-jar to produce $TMP/signed.ofd even in native mode. We rely on the
-  # fat-jar being built first (mvn -DskipTests package).
-  if [[ -f "$REPO_ROOT/target/ofd-cli.jar" ]]; then
-    java -jar "$REPO_ROOT/target/ofd-cli.jar" sign \
-      "$RES/helloworld-sign.ofd" -p12 "$RES/USER.p12" -P 777777 --alias private \
-      -o "$TMP/signed.ofd" >/dev/null 2>&1
-    echo "  PASS  sign (via fat-jar, sign not registered on native)"
-    PASS=$((PASS+1))
-  else
-    echo "  SKIP  sign (no fat-jar at $REPO_ROOT/target/ofd-cli.jar — run 'mvn package' first)"
+  # On native, $BIN is the native binary — sign works there now too.
+  if [[ ! -f "$TMP/signed.ofd" ]]; then
+    "$BIN" sign "$RES/helloworld-sign.ofd" -p12 "$RES/USER.p12" \
+      -P 777777 --alias private -o "$TMP/signed.ofd" >/dev/null 2>&1
   fi
+  run_test_contains "sign" 0 "Signed" "$BIN sign '$RES/helloworld-sign.ofd' -p12 '$RES/USER.p12' -P 777777 --alias private -o '$TMP/signed.ofd'"
 fi
 
 # --- verify ---
