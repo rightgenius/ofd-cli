@@ -473,13 +473,74 @@ mvn -o test
 
 ---
 
-## 路线图
+## AI Agent 集成
 
-- [ ] 解决 GraalVM 25.x BC provider 限制，native 全功能化
-- [ ] Homebrew tap（`brew install ofdcli/tap/ofd`）
-- [ ] Linux ARM64 / Windows ARM64 native binary
-- [ ] Shell 补全脚本（bash / zsh / fish）
-- [ ] 流式输入支持（stdin → stdout）
+`ofd-cli` 的所有子命令都遵循 [退出码协议](#退出码agent-编程约定)，结果走 stdout、日志走 stderr、全部支持 `--json`——**专为 agent 调 subprocess 而设计**。
+
+### 一次性装好 skill（推荐）
+
+仓库根的 [`skills/ofd/SKILL.md`](skills/ofd/SKILL.md) 是给 AI agent 用的 skill 文件，覆盖所有子命令的调用模式 + JSON 输出 schema。把它装到你 agent 的 skills 目录就能让 agent 自动知道怎么用 `ofd`：
+
+| Agent | 安装位置 |
+|---|---|
+| Claude Code | `~/.claude/skills/ofd/SKILL.md` |
+| Cursor | `~/.cursor/rules/ofd.md` |
+| Codex | `~/.codex/skills/ofd/SKILL.md` |
+| 其他 | 任何 agent 加载 system prompt 时包含此文件即可 |
+
+一行安装（Claude Code）：
+
+```bash
+mkdir -p ~/.claude/skills/ofd
+curl -fsSL https://raw.githubusercontent.com/rightgenius/ofd-cli/main/skills/ofd/SKILL.md \
+  -o ~/.claude/skills/ofd/SKILL.md
+```
+
+### agent 调用的标准模板
+
+Python：
+
+```python
+import subprocess, json
+
+def ofd(*args, check=True):
+    """Run ofd CLI; returns parsed JSON if --json, else stdout string.
+    Raises RuntimeError on non-zero exit."""
+    r = subprocess.run(["ofd", *args], capture_output=True, text=True)
+    if r.returncode != 0:
+        raise RuntimeError(f"ofd {args} failed (exit {r.returncode}): {r.stderr}")
+    if "--json" in args:
+        return json.loads(r.stdout)
+    return r.stdout
+
+# 示例：批量提取电子发票文本
+result = ofd("info", "invoice.ofd", "--json")
+print(result["pageCount"], result["docInfo"])
+```
+
+Node.js：
+
+```js
+const { execFileSync } = require("child_process");
+const ofd = (...args) => execFileSync("ofd", args, { encoding: "utf8" });
+
+const info = JSON.parse(ofd("info", "invoice.ofd", "--json"));
+```
+
+Shell：
+
+```bash
+# Agent 写脚本时直接调
+ofd to-png invoice.ofd -o /tmp/invoice/ && ls /tmp/invoice/
+```
+
+### 给 agent 的"何时用我"提示
+
+把这段加到你的 agent system prompt 或 CLAUDE.md / AGENTS.md：
+
+> 当用户提供 `.ofd` 文件或询问 OFD（Open Fixed-layout Document）相关任务时，使用 `ofd` CLI。
+> 先跑 `ofd info <file> --json` 了解文档结构，再选择对应子命令（`to-png` / `to-pdf` / `extract` / `sign` 等）。
+> 退出码 0=成功 / 1=部分失败 / 2=参数错 / 3=内部错 / 4=IO 错。
 
 ---
 
