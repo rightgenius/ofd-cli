@@ -6,7 +6,7 @@
 
     <groupId>io.github.ofdcli</groupId>
     <artifactId>ofd-cli</artifactId>
-    <version>0.1.5</version>
+    <version>0.1.6</version>
     <packaging>jar</packaging>
 
     <name>ofd-cli</name>
@@ -37,7 +37,7 @@
              - clip().newPath() 修 OpenPDF W 后 current path 不重置 → 字符 path 被裁
              v2.4.0-openpdf.2 adds TTC font path support + macOS CJK aliases
              so embedded CJK (e.g. 发票示例.ofd) renders properly on macOS. -->
-        <ofdrw.version>2.4.0-openpdf.3</ofdrw.version>
+        <ofdrw.version>2.4.0-openpdf.4</ofdrw.version>
         <jackson.version>2.16.1</jackson.version>
 
         <native.maven.plugin.version>0.10.2</native.maven.plugin.version>

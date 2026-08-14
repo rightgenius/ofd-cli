@@ -50,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/rightgenius/ofd-cli/main/scripts/in
 6. 跑 `ofd --version` 验证
 
 环境变量：
-- `OFD_VERSION=v0.1.5` — 锁定特定版本（默认：latest）
+- `OFD_VERSION=v0.1.6` — 锁定特定版本（默认：latest）
 - `OFD_INSTALL_DIR=/path` — 覆盖安装位置
 
 ### Homebrew（待发布）
@@ -110,7 +110,7 @@ sha256sum -c --ignore-missing SHA256SUMS
 
 ```bash
 $ ofd --version
-ofd-cli 0.1.5
+ofd-cli 0.1.6
   commit: 3d8a435
   java:   25.0.4 (GraalVM Community)
   os:     Mac OS X aarch64
@@ -204,7 +204,7 @@ ofd to-png invoice.ofd --no-default-fonts            # 跳过系统字体扫描
 
 ### `to-pdf <file> -o <out.pdf>`
 
-转换为 PDF。使用 [`rightgenius/ofdrw` 2.4.0-openpdf.3 fork](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.3)，
+转换为 PDF。使用 [`rightgenius/ofdrw` 2.4.0-openpdf.4 fork](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.4)，
 底座从 PDFBox 切到 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF)（**LGPL/MPL**，可商用），native-image 下不再
 触发 AWT FontManager JNI 失败，**macOS 中文 / 拉丁混排正常渲染**（TTC 字体自动加 `,0` sub-font 语法）。
 
@@ -213,9 +213,11 @@ ofd to-pdf invoice.ofd -o out/invoice.pdf
 ofd to-pdf invoice.ofd -o out/ --pages 1-3          # 指定页码
 ```
 
-> 💡 **v0.1.5 修了 OpenPDF fork 两个 bug**（滴滴电子发票等 0 TextObject OFD 现在完美渲染）：
-> - `compositeOnWhite()` 修 OpenPDF SMask BC 默认黑 → 红印章/二维码 alpha 透明区不再变黑
-> - `clip().newPath()` 修 OpenPDF W 后 current path 不重置 → 字符 path 不再被 winding 抵消裁掉
+> 💡 **v0.1.5 + v0.1.6 修了 OpenPDF fork 三个 bug**（滴滴电子发票等 0 TextObject OFD 现在完美渲染）：
+> - v0.1.5 `compositeOnWhite()` 修 OpenPDF SMask BC 默认黑 → 红印章/二维码 alpha 透明区不再变黑
+> - v0.1.5 `clip().newPath()` 修 OpenPDF W 后 current path 不重置 → 字符 path 不再被 winding 抵消裁掉
+> - v0.1.6 `buildImageWithExplicitMask()` 改用 explicit `/Mask` 替换 compositeOnWhite
+>   → 印章 alpha 透明区透出底层红字（不是被白底盖住）
 >
 > 升级依赖 `com.github.rightgenius:ofdrw-*:2.4.0-openpdf.3`（fork tag `v2.4.0-openpdf.3`）。
 >
@@ -371,7 +373,9 @@ native binary 出于以下原因**故意不注册** 5 个子命令（`sign` / `v
 
 > ℹ️ `to-pdf` 早期版本因 PDFBox 触发 AWT 也不工作；v0.1.3 切到
 > [`rightgenius/ofdrw` 2.4.0-openpdf fork](https://github.com/rightgenius/ofdrw) 后正常工作；v0.1.5 升级到
-> [2.4.0-openpdf.3](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.3) 修了两个 OpenPDF bug（SMask BC 黑底 + clip winding 错乱）。
+> [2.4.0-openpdf.3](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.3) 修了两个 OpenPDF bug（SMask BC 黑底 + clip winding 错乱）；
+> v0.1.6 升级到
+> [2.4.0-openpdf.4](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.4) 把印章 alpha 改成 explicit `/Mask` 透出底层红字。
 
 完整支持矩阵：
 
