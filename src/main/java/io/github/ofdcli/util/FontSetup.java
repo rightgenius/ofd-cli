@@ -27,8 +27,8 @@ public final class FontSetup {
         // regular JVM, so this is harmless there.
         NativeImageFontBootstrap.bootstrap();
         FontLoader fl = FontLoader.getInstance();
-        // CJK aliases that show up in Chinese government + Didi invoices.
-        // Mirrors OFD2PNGTest.java.
+        // CJK aliases that show up in OFD files from Chinese government,
+        // ride-hailing and e-commerce platforms. Mirrors OFD2PNGTest.java.
         fl.addAliasMapping("KaiTi_GB2312", "楷体")
                 .addAliasMapping("KaiTi", "楷体")
                 .addSimilarFontReplaceRegexMapping(".*Kai.*", "楷体")

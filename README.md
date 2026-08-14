@@ -233,7 +233,7 @@ ofd to-svg invoice.ofd -o svg_out/ --ppm 10          # 高分辨率
 
 提取纯文本。基于 ofdrw 的 `ContentExtractor`，按页遍历收集 `TextObject` 内容。
 
-> ⚠️ 注意：把文字渲染为矢量路径的 OFD（如部分滴滴电子发票）会提取出空文本。
+> ⚠️ 注意：部分 OFD 平台生成的电子发票把文字以 SVG 路径形式存储，`extract` 会返回空文本——需要 OCR 或 `to-png` 后再处理。
 
 ```bash
 ofd extract invoice.ofd                  # → stdout
@@ -479,21 +479,32 @@ mvn -o test
 
 ### 一次性装好 skill（推荐）
 
-仓库根的 [`skills/ofd/SKILL.md`](skills/ofd/SKILL.md) 是给 AI agent 用的 skill 文件，覆盖所有子命令的调用模式 + JSON 输出 schema。把它装到你 agent 的 skills 目录就能让 agent 自动知道怎么用 `ofd`：
+仓库根的 [`skills/ofd/SKILL.md`](skills/ofd/SKILL.md) 是给 AI agent 用的 skill 文件，覆盖所有子命令的调用模式 + JSON 输出 schema、Python / Node.js 调用模板、踩坑指南。把它装到你 agent 的 skills 目录，agent 就能自动知道怎么用 `ofd`：
 
-| Agent | 安装位置 |
+| Agent | 安装路径 |
 |---|---|
 | Claude Code | `~/.claude/skills/ofd/SKILL.md` |
-| Cursor | `~/.cursor/rules/ofd.md` |
 | Codex | `~/.codex/skills/ofd/SKILL.md` |
-| 其他 | 任何 agent 加载 system prompt 时包含此文件即可 |
+| Cursor | `~/.cursor/rules/ofd.md` |
+| 其他通用 agent | 任何会被作为 system prompt / context 加载的位置都行 |
 
-一行安装（Claude Code）：
+一行安装（自动检测 agent 类型）：
 
 ```bash
-mkdir -p ~/.claude/skills/ofd
-curl -fsSL https://raw.githubusercontent.com/rightgenius/ofd-cli/main/skills/ofd/SKILL.md \
-  -o ~/.claude/skills/ofd/SKILL.md
+# Claude Code
+mkdir -p ~/.claude/skills/ofd && \
+  curl -fsSL https://raw.githubusercontent.com/rightgenius/ofd-cli/main/skills/ofd/SKILL.md \
+    -o ~/.claude/skills/ofd/SKILL.md
+
+# Codex
+mkdir -p ~/.codex/skills/ofd && \
+  curl -fsSL https://raw.githubusercontent.com/rightgenius/ofd-cli/main/skills/ofd/SKILL.md \
+    -o ~/.codex/skills/ofd/SKILL.md
+
+# Cursor (作为 rule)
+mkdir -p ~/.cursor/rules && \
+  curl -fsSL https://raw.githubusercontent.com/rightgenius/ofd-cli/main/skills/ofd/SKILL.md \
+    -o ~/.cursor/rules/ofd.md
 ```
 
 ### agent 调用的标准模板
@@ -534,6 +545,8 @@ Shell：
 ofd to-png invoice.ofd -o /tmp/invoice/ && ls /tmp/invoice/
 ```
 
+> **PATH 兜底**：agent 运行环境里 `ofd` 不一定在 `PATH`。如果 `subprocess` 找不到，先查 `~/.local/bin/ofd`、`/usr/local/bin/ofd`、`/opt/homebrew/bin/ofd`，或在调用前显式 `export PATH="$HOME/.local/bin:$PATH"`。
+
 ### 给 agent 的"何时用我"提示
 
 把这段加到你的 agent system prompt 或 CLAUDE.md / AGENTS.md：
@@ -541,6 +554,7 @@ ofd to-png invoice.ofd -o /tmp/invoice/ && ls /tmp/invoice/
 > 当用户提供 `.ofd` 文件或询问 OFD（Open Fixed-layout Document）相关任务时，使用 `ofd` CLI。
 > 先跑 `ofd info <file> --json` 了解文档结构，再选择对应子命令（`to-png` / `to-pdf` / `extract` / `sign` 等）。
 > 退出码 0=成功 / 1=部分失败 / 2=参数错 / 3=内部错 / 4=IO 错。
+> 拿到的 OFD 没有明确指令时，先 `ofd to-png` 渲染看内容——视觉上往往一看就明白用户想要什么。
 
 ---
 

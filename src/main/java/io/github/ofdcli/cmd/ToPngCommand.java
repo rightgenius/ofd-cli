@@ -28,8 +28,9 @@ import java.util.stream.Stream;
  * Convert OFD file(s) to PNG images.
  *
  * <p>Reuses the font-alias + scanFontDir pattern from
- * {@code OFD2PNGTest.java} so that Chinese-only OFDs (e.g. 滴滴电子发票)
- * render correctly on macOS / Linux / Windows without manual font setup.
+ * {@code OFD2PNGTest.java} so that Chinese-only OFDs (e.g. invoices from
+ * various government / 出行 / 电商 platforms) render correctly on
+ * macOS / Linux / Windows without manual font setup.
  */
 @Command(
         name = "to-png",
@@ -147,8 +148,9 @@ public class ToPngCommand implements Callable<Integer> {
         // (no AWT native library in the substrate VM).
         FontSetup.setup(extraFontDirs, noDefaultFonts);
         FontLoader fl = FontLoader.getInstance();
-        // Common Chinese font aliases — OFDs from gov / Didi typically reference
-        // KaiTi/SimSun/Song/Hei families that are absent on Mac/Linux.
+        // Common Chinese font aliases — OFDs from government / ride-hailing /
+        // e-commerce platforms typically reference KaiTi/SimSun/Song/Hei
+        // families that are absent on Mac/Linux.
         fl.addAliasMapping("KaiTi_GB2312", "楷体")
                 .addAliasMapping("KaiTi", "楷体")
                 .addSimilarFontReplaceRegexMapping(".*Kai.*", "楷体")
