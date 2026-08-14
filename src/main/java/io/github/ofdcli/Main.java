@@ -28,15 +28,13 @@ import picocli.CommandLine.ScopeType;
                 "Run 'ofd <command> --help' for command-specific help.",
                 "",
                 "Two distributions are shipped:",
-                "  • ofd         (native binary, 10 subcommands — see list below)",
+                "  • ofd         (native binary, 11 subcommands — see list below)",
                 "  • ofd-cli.jar (fat-jar, all 13 subcommands, requires JRE 11+)",
-                "The sign/to-html/to-svg subcommands are only",
-                "available in the fat-jar: sign needs a BouncyCastle",
-                "provider that GraalVM 25.0.4 CE cannot register (oracle/graal#13412);",
-                "to-html/to-svg need AWT which the substrate VM cannot load.",
-                "verify/validate are now supported in both — they were migrated",
-                "to BC's lightweight crypto API in ofdrw 2.4.0-openpdf.5",
-                "(GmVerifyHelper + CertTools.objHolder in ofdrw-gm).",
+                "The to-html/to-svg subcommands are only available in the fat-jar",
+                "because they need AWT which the substrate VM cannot load.",
+                "sign / verify / validate are now supported in both — they were",
+                "migrated to BC's lightweight crypto API in ofdrw 2.4.0-openpdf.5+",
+                "(GmVerifyHelper + CertTools.objHolder + PKCS12ToolsLight in ofdrw-gm).",
                 "to-pdf is supported in both — see PDFExporterOpenPDF in the",
                 "ofdrw 2.4.0-openpdf fork (rightgenius/ofdrw)."})
 public class Main implements Runnable {
@@ -65,16 +63,6 @@ public class Main implements Runnable {
      *
      * <p>Excluded from the native binary (kept in the fat-jar):</p>
      * <ul>
-     *   <li>{@link SignCommand} — needs a BouncyCastleProvider that the
-     *       closed-world {@code JceSecurity.getVerificationResult} check in
-     *       GraalVM 25.0.4 CE refuses to verify for runtime-registered
-     *       providers (see oracle/graal#13412). Sign uses the JCE provider
-     *       API ({@code KeyStore.getInstance("PKCS12", "BC")} +
-     *       {@code JcaContentSignerBuilder}) which goes through
-     *       {@code JceSecurity.canUseProvider} and blows up at runtime.
-     *       Out of scope for v0.2.0; sign may be tackled in a future release
-     *       by migrating to {@code JcaPKCS12.engineLoad} or PKCS#12 BC
-     *       lightweight parsing.</li>
      *   <li>{@link ToHtmlCommand}, {@link ToSvgCommand} — HtmlMaker / SVGExporter
      *       extend AWTMaker, which on macOS triggers
      *       {@code sun/font/CFontManager} JNI lookups that fail with SIGABRT
@@ -109,6 +97,7 @@ public class Main implements Runnable {
             DecryptCommand.class,
             VerifyCommand.class,
             ValidateCommand.class,
+            SignCommand.class,
     };
 
     @Option(names = {"--json"}, scope = ScopeType.INHERIT,

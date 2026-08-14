@@ -3,10 +3,10 @@ package io.github.ofdcli.cmd;
 import io.github.ofdcli.ExitCode;
 import io.github.ofdcli.Main;
 import io.github.ofdcli.json.JsonWriter;
-import org.ofdrw.gm.cert.PKCS12Tools;
+import org.ofdrw.gm.cert.PKCS12ToolsLight;
 import org.ofdrw.reader.OFDReader;
 import org.ofdrw.sign.OFDSigner;
-import org.ofdrw.sign.signContainer.GBT35275DSContainer;
+import org.ofdrw.sign.signContainer.GBT35275DSContainerLight;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -15,8 +15,6 @@ import picocli.CommandLine.ParentCommand;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.util.concurrent.Callable;
 
 /**
@@ -78,10 +76,12 @@ public class SignCommand implements Callable<Integer> {
 
         long t0 = System.currentTimeMillis();
         try {
-            String aliasName = alias != null ? alias : password;
-            PrivateKey prvKey = PKCS12Tools.ReadPrvKey(pkcs12, aliasName, password);
-            Certificate cert = PKCS12Tools.ReadUserCert(pkcs12, aliasName, password);
-            GBT35275DSContainer container = new GBT35275DSContainer(cert, prvKey);
+            // 走 BC 轻量级 API：PKCS12ToolsLight 解 .p12 + GBT35275DSContainerLight 签名
+            // 不触发 JceSecurity.canUseProvider 校验，让 native binary 也能跑
+            // （详细原理见 docs/native-verify-plan.md）
+            PKCS12ToolsLight.Result p12 = PKCS12ToolsLight.read(pkcs12, password.toCharArray());
+            GBT35275DSContainerLight container = new GBT35275DSContainerLight(
+                    p12.certHolder, p12.privateKey);
 
             try (OFDReader reader = new OFDReader(input);
                  OFDSigner signer = new OFDSigner(reader, output)) {
