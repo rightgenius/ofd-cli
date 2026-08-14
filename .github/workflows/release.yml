@@ -145,26 +145,35 @@ jobs:
           # file of the same name; do everything inside one shell so the
           # rename-to-dir step is atomic.)
           #
-          # Newer GraalVM versions (>= 25.0) may build a statically-linked
-          # binary that doesn't emit lib*.dylib siblings; that's fine —
-          # the system AWT libs are loaded from the JVM install dir.
+          # Newer GraalVM versions (>= 25.2) emit *shim* dylibs (e.g.
+          # libjava.dylib is a 35KB static-link shim, not the full 185KB
+          # JDK version). The shim is what the binary actually wants at
+          # runtime — overwriting it with the JDK's full dylib breaks AWT
+          # (System.loadLibrary("awt") gets a corrupted set of dylib peers
+          # and the closed-world check rejects them).
+          #
+          # So: copy whatever GraalVM emitted first, then for any of the
+          # 10 well-known runtime dylibs GraalVM *didn't* emit (older
+          # 25.0.2 emits 0 dylib siblings), fall back to copying from
+          # $JAVA_HOME/lib/. The "if not exists" check is the key — never
+          # overwrite an emit shim.
           mkdir target/ofd-darwin-arm64
           mv target/ofd target/ofd-darwin-arm64/ofd-darwin-arm64
           shopt -s nullglob
           cp target/lib*.dylib target/ofd-darwin-arm64/ 2>/dev/null || true
-          # GraalVM 25.0.2 native-image on macOS arm64 doesn't emit lib*.dylib
-          # siblings, so we copy the runtime libs out of the JDK install that
-          # setup-graalvm prepared for us. Without these, the binary crashes
-          # with UnsatisfiedLinkError("No awt in java.library.path") at
-          # the first touch of any java.awt.Font / AWT class.
-          if compgen -G "$JAVA_HOME/lib/"*.dylib > /dev/null; then
-            cp "$JAVA_HOME/lib/"libawt.dylib "$JAVA_HOME/lib/"libawt_lwawt.dylib \
-               "$JAVA_HOME/lib/"libfontmanager.dylib "$JAVA_HOME/lib/"libfreetype.dylib \
-               "$JAVA_HOME/lib/"libjava.dylib "$JAVA_HOME/lib/"libjavajpeg.dylib \
-               "$JAVA_HOME/lib/"libjvm.dylib "$JAVA_HOME/lib/"liblcms.dylib \
-               "$JAVA_HOME/lib/"libmlib_image.dylib "$JAVA_HOME/lib/"libosxapp.dylib \
-               target/ofd-darwin-arm64/ 2>/dev/null || true
-          fi
+          # Only copy the well-known set of runtime dylibs that the binary
+          # actually loads — the 32+ extra dylibs in the JDK (libattach,
+          # libdt_socket, libjdwp, libmanagement*, etc.) are not referenced
+          # and would bloat the release without benefit.
+          for dylib_name in libawt libawt_lwawt libfontmanager libfreetype \
+                            libjava libjavajpeg libjvm liblcms \
+                            libmlib_image libosxapp; do
+            if [ -f "$JAVA_HOME/lib/${dylib_name}.dylib" ] \
+               && [ ! -f "target/ofd-darwin-arm64/${dylib_name}.dylib" ]; then
+              cp "$JAVA_HOME/lib/${dylib_name}.dylib" \
+                 "target/ofd-darwin-arm64/" 2>/dev/null || true
+            fi
+          done
           ls -la target/ofd-darwin-arm64/
 
       - name: Upload native artifact
@@ -288,9 +297,24 @@ jobs:
           # the loader can find them via LD_LIBRARY_PATH or rpath, but we
           # still package them alongside the binary so the install script
           # can drop them in ~/.local/bin/ next to the executable.
+          #
+          # Same shim-overwrite pitfall as on macOS: GraalVM 25.2+ emits
+          # shim dylibs that we must NOT overwrite with the JDK's full
+          # versions. Use the "if not exists" check (see macOS job for
+          # the longer explanation).
           mkdir target/ofd-linux-x64
           mv target/ofd target/ofd-linux-x64/ofd-linux-x64
+          shopt -s nullglob
           cp target/lib*.so target/ofd-linux-x64/ 2>/dev/null || true
+          for dylib_name in libawt libawt_lwawt libfontmanager libfreetype \
+                            libjava libjavajpeg libjvm liblcms \
+                            libmlib_image; do
+            if [ -f "$JAVA_HOME/lib/${dylib_name}.so" ] \
+               && [ ! -f "target/ofd-linux-x64/${dylib_name}.so" ]; then
+              cp "$JAVA_HOME/lib/${dylib_name}.so" \
+                 "target/ofd-linux-x64/" 2>/dev/null || true
+            fi
+          done
           ls -la target/ofd-linux-x64/
 
       - name: Upload native artifact
