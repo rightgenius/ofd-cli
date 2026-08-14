@@ -113,7 +113,11 @@ echo "→ Checksum OK"
 #     "UnsatisfiedLinkError: Can't load library: awt".
 # ---------------------------------------------------------------------------
 
-DYLIB_PATTERN='^lib[a-zA-Z][a-zA-Z0-9_]*\.(dylib|so)$'
+# SHA256SUMS format is `<hash> <filename>` (two spaces between fields, then
+# the filename), so we anchor on the whitespace separator + filename start,
+# not on the start of the line. Anchoring with `^lib` would match nothing
+# because every line starts with a hex hash.
+DYLIB_PATTERN='[[:space:]]lib[a-zA-Z][a-zA-Z0-9_]*\.(dylib|so)$'
 DYLIB_NAMES=$(grep -E "${DYLIB_PATTERN}" "${TMPDIR}/SHA256SUMS" | awk '{print $2}')
 
 if [[ -z "${DYLIB_NAMES}" ]]; then
