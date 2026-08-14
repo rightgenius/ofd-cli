@@ -66,7 +66,17 @@ public class Main implements Runnable {
      *       need a BouncyCastleProvider that the closed-world
      *       JceSecurity.getVerificationResult check in GraalVM 25.0.4 CE
      *       refuses to verify for runtime-registered providers
-     *       (see oracle/graal#13412).</li>
+     *       (see oracle/graal#13412). These subcommands call
+     *       {@code Signature.getInstance("SM3WithSM2", "BC")} via the JCE
+     *       provider API, which goes through {@code JceSecurity.canUseProvider}
+     *       and blows up at runtime.</li>
+     *   <li>{@code encrypt} / {@code decrypt} <em>do</em> work in the native
+     *       binary because ofdrw-crypto's {@code UserPasswordEncryptor} uses
+     *       BC's <strong>lightweight crypto API</strong>
+     *       ({@code org.bouncycastle.crypto.engines.SM4Engine} +
+     *       {@code SM3.Digest}) directly — it never touches
+     *       {@code java.security.Security}, so the closed-world provider
+     *       check is irrelevant.</li>
      *   <li>{@link ToHtmlCommand}, {@link ToSvgCommand} — HtmlMaker / SVGExporter
      *       extend AWTMaker, which on macOS triggers
      *       {@code sun/font/CFontManager} JNI lookups that fail with SIGABRT

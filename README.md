@@ -354,8 +354,10 @@ native binary 出于以下原因**故意不注册** 5 个子命令（`sign` / `v
 
 | 子命令 | 根因 |
 |---|---|
-| `sign` / `verify` / `validate` | GraalVM 25.x CE 的 closed-world JCE 验证 — `BouncyCastleProvider` 需要 build time 注册到 `Security`，但工具链目前没有 BouncyCastleSubstitutions 那套方案（见 [oracle/graal#13412](https://github.com/oracle/graal/issues/13412)） |
+| `sign` / `verify` / `validate` | GraalVM 25.x CE 的 closed-world JCE 验证 — `BouncyCastleProvider` 需要 build time 注册到 `Security`，但工具链目前没有 BouncyCastleSubstitutions 那套方案（见 [oracle/graal#13412](https://github.com/oracle/graal/issues/13412)）。这三个子命令走的是 JCE provider API（`Signature.getInstance("SM3WithSM2", "BC")`） |
 | `to-html` / `to-svg` | AWTMaker 父类触发 `sun/font/CFontManager` JNI — macOS 字体管理器在 native-image 下无法解析 → SIGABRT |
+
+**`encrypt` / `decrypt` 为什么能跑**（经常被问）：ofdrw-crypto 的 `UserPasswordEncryptor` 走的是 BouncyCastle 的**轻量级 crypto API**（`org.bouncycastle.crypto.engines.SM4Engine` + `SM3.Digest`），直接 `new` 出来用，**不经过 `java.security.Security`**，所以 closed-world 的 provider 校验压根不触发；只有 sign/verify 这条需要 JCE provider 名字解析的路径才会炸。
 
 完整支持矩阵：
 
