@@ -1,27 +1,26 @@
 # ofd-cli
 
-> **OFD**（Open Fixed-layout Document，**版式文档**）命令行工具，基于 [ofdrw](https://github.com/ofdrw/ofdrw) 封装。  
+> **OFD**（Open Fixed-layout Document，**版式文档**）命令行工具，基于 [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) 封装。
 > 专为 **AI Agent** 与**自动化流水线**设计：单文件静态二进制、标准化退出码、JSON 输出。
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/rightgenius/ofd-cli/ci.yml?branch=main&label=CI)](https://github.com/rightgenius/ofd-cli/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/rightgenius/ofd-cli?label=release)](https://github.com/rightgenius/ofd-cli/releases/latest)
 [![Java 11+](https://img.shields.io/badge/Java-11%2B-orange.svg)](https://adoptium.net/)
-[![Native binary](https://img.shields.io/badge/native--image-54MB-success.svg)](https://www.graalvm.org/native-image/)
-[![Maven Central](https://img.shields.io/badge/ofdrw-2.4.0-informational.svg)](https://central.sonatype.com/artifact/org.ofdrw/ofdrw-full)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#)
+[![Native binary](https://img.shields.io/badge/native--image-58MB-success.svg)](https://www.graalvm.org/native-image/)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](#)
 
 ---
 
 ## 这是什么
 
-`ofd-cli` 把 Java 生态里最完善的 OFD 处理库 [ofdrw](https://github.com/ofdrw/ofdrw) 装进一个**单文件可执行二进制**里，零 JRE 依赖，可以直接被 shell、CI、AI agent 调用。
+`ofd-cli` 把 Java 生态里最完善的 OFD 处理库 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw)（Apache 2.0，PDFBox → OpenPDF 1.3.39 fork）装进一个**单文件可执行二进制**里，零 JRE 依赖，可以直接被 shell、CI、AI agent 调用。
 
 它解决三件事：
 
 1. **AI Agent 友好**——标准化退出码、`--json` 全局 flag、日志走 stderr、结果走 stdout。
 2. **零部署摩擦**——把 jar 编译成 native binary，用户机器不需要任何 Java 运行时。
-3. **不重复造轮子**——所有 OFD 解析、渲染、签名、加密逻辑都委托给 ofdrw，本项目只做 CLI 包装和 native 编译。
+3. **不重复造轮子**——所有 OFD 解析、渲染、签名、加密逻辑都委托给 rightgenius/ofdrw，本项目只做 CLI 包装和 native 编译。
 
 适用场景：
 
@@ -111,7 +110,7 @@ sha256sum -c --ignore-missing SHA256SUMS
 ```bash
 $ ofd --version
 ofd-cli 0.1.6
-  commit: 3d8a435
+  commit: 2acd6a9
   java:   25.0.4 (GraalVM Community)
   os:     Mac OS X aarch64
 
@@ -149,7 +148,7 @@ $ ofd info invoice.ofd --json | jq '.'
 | 维度 | `ofd`（native binary） | `ofd-cli.jar`（fat-jar） |
 |---|---|---|
 | 启动时间 | < 100 ms | ~500 ms |
-| 大小 | 54 MB | 33 MB |
+| 大小 | 58 MB | 33 MB |
 | JRE 依赖 | 无 | 需要 JRE 11+ |
 | 子命令数 | **8** | **13** |
 
@@ -164,7 +163,7 @@ native binary 是首选。fat-jar 是兜底——当 native 缺某个子命令�
 | `version` | 版本信息 | ✅ | ✅ |
 | `info` | 文档元数据（页数、签名、附件） | ✅ | ✅ |
 | `to-png` | 渲染为 PNG（默认 192 dpi） | ✅ | ✅ |
-| `to-pdf` | 渲染为 PDF（OpenPDF 1.3.39 fork） | ✅ | ✅ |
+| `to-pdf` | 渲染为 PDF | ✅ | ✅ |
 | `to-html` | 渲染为 HTML（含 SVG 资源） | ❌ | ✅ |
 | `to-svg` | 渲染为 SVG（每页一个文件） | ❌ | ✅ |
 | `extract` | 提取纯文本 | ✅ | ✅ |
@@ -197,33 +196,20 @@ ofd info ./ofd_folder/               # 目录下第一个 OFD
 
 ```bash
 ofd to-png invoice.ofd -o out/
-ofd to-png ./ofd_folder/ -o ./png/ --ppm 10         # 高分辨率
+ofd to-png ./ofd_folder/ -o ./png/
+ofd to-png invoice.ofd --ppm 10         # 高分辨率
 ofd to-png invoice.ofd --font-dir /extra/fonts       # 追加字体目录
 ofd to-png invoice.ofd --no-default-fonts            # 跳过系统字体扫描
 ```
 
 ### `to-pdf <file> -o <out.pdf>`
 
-转换为 PDF。使用 [`rightgenius/ofdrw` 2.4.0-openpdf.4 fork](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.4)，
-底座从 PDFBox 切到 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF)（**LGPL/MPL**，可商用），native-image 下不再
-触发 AWT FontManager JNI 失败，**macOS 中文 / 拉丁混排正常渲染**（TTC 字体自动加 `,0` sub-font 语法）。
+渲染为 PDF。基于 [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) 的 OpenPDF 1.3.39 fork（**LGPL/MPL**，可商用），native-image 下不再触发 AWT FontManager JNI 失败，**macOS 中文 / 拉丁混排正常渲染**（TTC 字体自动加 `,0` sub-font 语法）。
 
 ```bash
 ofd to-pdf invoice.ofd -o out/invoice.pdf
 ofd to-pdf invoice.ofd -o out/ --pages 1-3          # 指定页码
 ```
-
-> 💡 **v0.1.5 + v0.1.6 修了 OpenPDF fork 三个 bug**（滴滴电子发票等 0 TextObject OFD 现在完美渲染）：
-> - v0.1.5 `compositeOnWhite()` 修 OpenPDF SMask BC 默认黑 → 红印章/二维码 alpha 透明区不再变黑
-> - v0.1.5 `clip().newPath()` 修 OpenPDF W 后 current path 不重置 → 字符 path 不再被 winding 抵消裁掉
-> - v0.1.6 `buildImageWithExplicitMask()` 改用 explicit `/Mask` 替换 compositeOnWhite
->   → 印章 alpha 透明区透出底层红字（不是被白底盖住）
->
-> 升级依赖 `com.github.rightgenius:ofdrw-*:2.4.0-openpdf.3`（fork tag `v2.4.0-openpdf.3`）。
->
-> 💡 v0.1.4 修了一个微妙的 CI bug：GraalVM 25.2+ emit 的 `libjava.dylib` 是 35KB 静态链接 shim，
-> 旧版 release.yml Stage 步骤无脑 `cp $JAVA_HOME/lib/lib*.dylib` 会把它覆盖成 185KB JDK 全功能版，
-> 导致 AWT 链接失败 (`UnsatisfiedLinkError`)。修法是 `if not exists` 兜底。
 
 ### `to-html <file> -o <out.html>`
 
@@ -366,16 +352,10 @@ native binary 出于以下原因**故意不注册** 5 个子命令（`sign` / `v
 
 **为什么这 5 个跑不起来**：
 
-| 子命令 | 根因 | 详细 |
-|---|---|---|
-| `sign` / `verify` / `validate` | GraalVM 25.0.4 CE 的 closed-world JCE 验证 | 见 [oracle/graal#13412](https://github.com/oracle/graal/issues/13412) — `BouncyCastleProvider` 需要 build time 注册到 `Security`，但工具链目前没有 BouncyCastleSubstitutions 那套方案（参见 [Quarkus #23527](https://github.com/quarkusio/quarkus/pull/23527) 怎么做的） |
-| `to-html` / `to-svg` | AWTMaker 父类触发 `sun/font/CFontManager` JNI | macOS 字体管理器在 native-image 下无法解析 → SIGABRT |
-
-> ℹ️ `to-pdf` 早期版本因 PDFBox 触发 AWT 也不工作；v0.1.3 切到
-> [`rightgenius/ofdrw` 2.4.0-openpdf fork](https://github.com/rightgenius/ofdrw) 后正常工作；v0.1.5 升级到
-> [2.4.0-openpdf.3](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.3) 修了两个 OpenPDF bug（SMask BC 黑底 + clip winding 错乱）；
-> v0.1.6 升级到
-> [2.4.0-openpdf.4](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.4) 把印章 alpha 改成 explicit `/Mask` 透出底层红字。
+| 子命令 | 根因 |
+|---|---|
+| `sign` / `verify` / `validate` | GraalVM 25.x CE 的 closed-world JCE 验证 — `BouncyCastleProvider` 需要 build time 注册到 `Security`，但工具链目前没有 BouncyCastleSubstitutions 那套方案（见 [oracle/graal#13412](https://github.com/oracle/graal/issues/13412)） |
+| `to-html` / `to-svg` | AWTMaker 父类触发 `sun/font/CFontManager` JNI — macOS 字体管理器在 native-image 下无法解析 → SIGABRT |
 
 完整支持矩阵：
 
@@ -424,7 +404,7 @@ native binary 因为 AWT 无法枚举字体，会通过反射直接读文件系�
 需要 JDK 11+、Maven 3.9+。
 
 ```bash
-git clone https://github.com/ofdcli/ofd-cli.git
+git clone https://github.com/rightgenius/ofd-cli.git
 cd ofd-cli
 
 # fat-jar（任何 JDK 11+）
@@ -450,7 +430,7 @@ mvn -Pnative -DskipTests clean package
 # 单元测试（JUnit 5，几秒钟）
 mvn -o test
 
-# 集成测试（每种模式 39 用例，共 78）
+# 集成测试（每种模式 39 用例）
 ./src/test/scripts/run-tests.sh -m jar     # fat-jar
 ./src/test/scripts/run-tests.sh -m native   # native binary
 ```
@@ -460,19 +440,16 @@ mvn -o test
 
 ---
 
-## 上游致谢
+## 上游
 
-`ofd-cli` 是 [ofdrw](https://github.com/ofdrw/ofdrw) 项目的**命令行包装层**，所有 OFD 解析、渲染、签名、加密能力都来自 ofdrw 库。
+`ofd-cli` 是 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw) 的**命令行包装层**，所有 OFD 解析、渲染、签名、加密能力都来自 rightgenius/ofdrw。
 
-- **上游项目**：[ofdrw/ofdrw](https://github.com/ofdrw/ofdrw) — Apache 2.0
-- **本项目**：仅做 CLI 封装 + native-image 编译 + 字体 bootstrap + 标准化退出码 / JSON 输出
-- **当前 ofdrw 版本**：`2.4.0`（来自 Maven Central）
+- **上游项目**：[rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) — Apache 2.0
+- **本项目**：CLI 封装 + native-image 编译 + 字体 bootstrap + 标准化退出码 / JSON 输出
 
-如果你发现 OFD 处理逻辑层面的 bug，先去上游反馈；如果是 CLI 体验、native 编译、Agent 集成相关的问题，在本仓库开 issue。
+> 上游 `rightgenius/ofdrw` 是对原 `ofdrw/ofdrw` 的 fork，因为 PDFBox 依赖触发 AWT 在 GraalVM native-image 下不可用，所以 PDF 渲染底座切到 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF)（LGPL/MPL，可商用），并修复了若干 OpenPDF 自身的 PDF spec 违规。
 
-### 关联 PR
-
-针对 GraalVM native-image 下 BouncyCastle 注册困难的问题，本项目维护者在 [rightgenius/ofdrw#526148de](https://github.com/ofdrw/ofdrw/pull/new/feature/graal-bc-provider-v2) 提了 `GmProviders` 统一 Provider 获取入口的 PR，作为后续 native 全功能化的前置重构。
+如果你发现 OFD 处理逻辑层面的 bug，先去上游 [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) 反馈；如果是 CLI 体验、native 编译、Agent 集成相关的问题，在本仓库开 issue。
 
 ---
 
@@ -499,7 +476,6 @@ mvn -o test
 ## 路线图
 
 - [ ] 解决 GraalVM 25.x BC provider 限制，native 全功能化
-- [ ] GitHub Actions CI（多平台 native 编译 + 集成测试）
 - [ ] Homebrew tap（`brew install ofdcli/tap/ofd`）
 - [ ] Linux ARM64 / Windows ARM64 native binary
 - [ ] Shell 补全脚本（bash / zsh / fish）
@@ -513,9 +489,9 @@ mvn -o test
 
 包含的第三方组件各自的许可见 fat-jar 内 `META-INF/NOTICE.*` 文件：
 
-- [ofdrw](https://github.com/ofdrw/ofdrw) — Apache 2.0
+- [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) — Apache 2.0
 - [BouncyCastle](https://www.bouncycastle.org/) — MIT
-- [PDFBox](https://pdfbox.apache.org/) — Apache 2.0
+- [OpenPDF](https://github.com/LibrePDF/OpenPDF) — LGPL/MPL
 - [Picocli](https://picocli.info/) — Apache 2.0
 - [Jackson](https://github.com/FasterXML/jackson) — Apache 2.0
 - [TwelveMonkeys ImageIO](https://github.com/haraldk/TwelveMonkeys) — BSD-3-Clause

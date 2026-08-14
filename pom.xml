@@ -26,17 +26,12 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <picocli.version>4.7.6</picocli.version>
-        <!-- ofdrw fork: 2.4.0-openpdf.3 from rightgenius/ofdrw replaces
+        <!-- ofdrw fork: 2.4.0-openpdf.4 from rightgenius/ofdrw replaces
              PDFBox with OpenPDF in the OFD→PDF exporter (PDFExporterOpenPDF),
              making to-pdf work in GraalVM native-image. PDF→OFD is broken
              in this variant (PDFConverter is a stub).
-             Sourced via JitPack (com.github.rightgenius:ofdrw-full:2.4.0-openpdf.3)
-             so the CI can resolve the dependency without manually mvn install.
-             v2.4.0-openpdf.3 修两 bug:
-             - compositeOnWhite 修 OpenPDF SMask BC 黑底 (印章/二维码 alpha 区)
-             - clip().newPath() 修 OpenPDF W 后 current path 不重置 → 字符 path 被裁
-             v2.4.0-openpdf.2 adds TTC font path support + macOS CJK aliases
-             so embedded CJK (e.g. 发票示例.ofd) renders properly on macOS. -->
+             Resolved via local mvn install in CI (fork is cloned + mvn install
+             from the tagged release); JitPack is no longer used. -->
         <ofdrw.version>2.4.0-openpdf.4</ofdrw.version>
         <jackson.version>2.16.1</jackson.version>
 
@@ -70,10 +65,9 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- ofdrw 2.4.0-openpdf.2 (PDFBox -> OpenPDF fork) via JitPack.
-             The fork at github.com/rightgenius/ofdrw is built on demand by
-             jitpack.io. Use groupId 'com.github.rightgenius' instead of
-             'org.ofdrw' so JitPack serves it. -->
+        <!-- rightgenius/ofdrw 2.4.0-openpdf.4 (PDFBox -> OpenPDF fork).
+             Built and installed to local m2 by .github/workflows/release.yml
+             from the tagged fork release; no remote repo lookup. -->
         <dependency>
             <groupId>com.github.rightgenius</groupId>
             <artifactId>ofdrw-full</artifactId>
@@ -96,11 +90,9 @@
     </dependencies>
 
     <repositories>
-        <!-- JitPack builds the openpdf fork of ofdrw on demand. -->
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
+        <!-- (no remote repos) — the rightgenius/ofdrw fork is built and
+             installed to the local m2 by .github/workflows/release.yml
+             before mvn package runs. -->
     </repositories>
 
     <build>
