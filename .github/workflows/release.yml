@@ -37,13 +37,13 @@ jobs:
       # JitPack, but JitPack auth/availability is flaky for public forks.
       # Build the fork locally and install it into ~/.m2 under the
       # com.github.rightgenius coordinate so the build never touches JitPack.
-      - name: Build ofdrw fork (2.4.0-openpdf.6) and install to local m2
+      - name: Build ofdrw fork (2.4.0-openpdf.7) and install to local m2
         run: |
           set -euo pipefail
-          git clone --depth 1 --branch v2.4.0-openpdf.6 \
+          git clone --depth 1 --branch v2.4.0-openpdf.7 \
             https://github.com/rightgenius/ofdrw.git /tmp/ofdrw-fork
           cd /tmp/ofdrw-fork
-          # parent pom already pins <version>2.4.0-openpdf.6</version>. Note:
+          # parent pom already pins <version>2.4.0-openpdf.7</version>. Note:
           # the fork's feature/openpdf-replacement branch doesn't include the
           # upstream ofdrw-pdfbox module, so we don't pass -pl exclusions.
           mvn -B -DskipTests -Dgpg.skip=true install
@@ -55,34 +55,34 @@ jobs:
             <modelVersion>4.0.0</modelVersion>
             <groupId>com.github.rightgenius</groupId>
             <artifactId>ofdrw-full</artifactId>
-            <version>2.4.0-openpdf.6</version>
+            <version>2.4.0-openpdf.7</version>
             <packaging>jar</packaging>
             <dependencies>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-core</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-gv</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-gm</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-converter</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-sign</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-layout</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-crypto</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-font</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-pkg</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-tool</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-reader</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-archive</artifactId><version>2.4.0-openpdf.6</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-core</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-gv</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-gm</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-converter</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-sign</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-layout</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-crypto</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-font</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-pkg</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-tool</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-reader</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-archive</artifactId><version>2.4.0-openpdf.7</version></dependency>
             </dependencies>
           </project>
           POM
           mvn -B install:install-file \
-            -Dfile=/tmp/ofdrw-fork/ofdrw-full/target/ofdrw-full-2.4.0-openpdf.6.jar \
+            -Dfile=/tmp/ofdrw-fork/ofdrw-full/target/ofdrw-full-2.4.0-openpdf.7.jar \
             -DpomFile=/tmp/ofdrw-full-pom.xml
           # ofdrw-crypto is a separate module the ofd-cli pom also pulls
           # under the com.github.rightgenius coordinate — install it too.
           mvn -B install:install-file \
-            -Dfile=/tmp/ofdrw-fork/ofdrw-crypto/target/ofdrw-crypto-2.4.0-openpdf.6.jar \
+            -Dfile=/tmp/ofdrw-fork/ofdrw-crypto/target/ofdrw-crypto-2.4.0-openpdf.7.jar \
             -DgroupId=com.github.rightgenius \
             -DartifactId=ofdrw-crypto \
-            -Dversion=2.4.0-openpdf.6 \
+            -Dversion=2.4.0-openpdf.7 \
             -Dpackaging=jar
 
       - name: Set up GraalVM JDK 25
@@ -200,10 +200,10 @@ jobs:
       - name: Checkout ofd-cli
         uses: actions/checkout@v4
 
-      - name: Build ofdrw fork (2.4.0-openpdf.6) and install to local m2
+      - name: Build ofdrw fork (2.4.0-openpdf.7) and install to local m2
         run: |
           set -euo pipefail
-          git clone --depth 1 --branch v2.4.0-openpdf.6 \
+          git clone --depth 1 --branch v2.4.0-openpdf.7 \
             https://github.com/rightgenius/ofdrw.git /tmp/ofdrw-fork
           cd /tmp/ofdrw-fork
           mvn -B -DskipTests -Dgpg.skip=true install
@@ -213,34 +213,34 @@ jobs:
             <modelVersion>4.0.0</modelVersion>
             <groupId>com.github.rightgenius</groupId>
             <artifactId>ofdrw-full</artifactId>
-            <version>2.4.0-openpdf.6</version>
+            <version>2.4.0-openpdf.7</version>
             <packaging>jar</packaging>
             <dependencies>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-core</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-gv</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-gm</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-converter</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-sign</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-layout</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-crypto</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-font</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-pkg</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-tool</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-reader</artifactId><version>2.4.0-openpdf.6</version></dependency>
-              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-archive</artifactId><version>2.4.0-openpdf.6</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-core</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-gv</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-gm</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-converter</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-sign</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-layout</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-crypto</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-font</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-pkg</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-tool</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-reader</artifactId><version>2.4.0-openpdf.7</version></dependency>
+              <dependency><groupId>org.ofdrw</groupId><artifactId>ofdrw-archive</artifactId><version>2.4.0-openpdf.7</version></dependency>
             </dependencies>
           </project>
           POM
           mvn -B install:install-file \
-            -Dfile=/tmp/ofdrw-fork/ofdrw-full/target/ofdrw-full-2.4.0-openpdf.6.jar \
+            -Dfile=/tmp/ofdrw-fork/ofdrw-full/target/ofdrw-full-2.4.0-openpdf.7.jar \
             -DpomFile=/tmp/ofdrw-full-pom.xml
           # ofdrw-crypto is a separate module the ofd-cli pom also pulls
           # under the com.github.rightgenius coordinate — install it too.
           mvn -B install:install-file \
-            -Dfile=/tmp/ofdrw-fork/ofdrw-crypto/target/ofdrw-crypto-2.4.0-openpdf.6.jar \
+            -Dfile=/tmp/ofdrw-fork/ofdrw-crypto/target/ofdrw-crypto-2.4.0-openpdf.7.jar \
             -DgroupId=com.github.rightgenius \
             -DartifactId=ofdrw-crypto \
-            -Dversion=2.4.0-openpdf.6 \
+            -Dversion=2.4.0-openpdf.7 \
             -Dpackaging=jar
 
       - name: Set up GraalVM JDK 25
