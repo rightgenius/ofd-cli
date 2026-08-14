@@ -28,14 +28,17 @@ import picocli.CommandLine.ScopeType;
                 "Run 'ofd <command> --help' for command-specific help.",
                 "",
                 "Two distributions are shipped:",
-                "  • ofd         (native binary, 8 subcommands — see list below)",
+                "  • ofd         (native binary, 10 subcommands — see list below)",
                 "  • ofd-cli.jar (fat-jar, all 13 subcommands, requires JRE 11+)",
-                "The sign/verify/validate/to-html/to-svg subcommands are only",
-                "available in the fat-jar: sign/verify/validate need a BouncyCastle",
+                "The sign/to-html/to-svg subcommands are only",
+                "available in the fat-jar: sign needs a BouncyCastle",
                 "provider that GraalVM 25.0.4 CE cannot register (oracle/graal#13412);",
                 "to-html/to-svg need AWT which the substrate VM cannot load.",
+                "verify/validate are now supported in both — they were migrated",
+                "to BC's lightweight crypto API in ofdrw 2.4.0-openpdf.5",
+                "(GmVerifyHelper + CertTools.objHolder in ofdrw-gm).",
                 "to-pdf is supported in both — see PDFExporterOpenPDF in the",
-                "ofdrw 2.4.0-openpdf.1 fork (rightgenius/ofdrw)."})
+                "ofdrw 2.4.0-openpdf fork (rightgenius/ofdrw)."})
 public class Main implements Runnable {
 
     /**
@@ -62,26 +65,31 @@ public class Main implements Runnable {
      *
      * <p>Excluded from the native binary (kept in the fat-jar):</p>
      * <ul>
-     *   <li>{@link SignCommand}, {@link VerifyCommand}, {@link ValidateCommand} —
-     *       need a BouncyCastleProvider that the closed-world
-     *       JceSecurity.getVerificationResult check in GraalVM 25.0.4 CE
-     *       refuses to verify for runtime-registered providers
-     *       (see oracle/graal#13412). These subcommands call
-     *       {@code Signature.getInstance("SM3WithSM2", "BC")} via the JCE
-     *       provider API, which goes through {@code JceSecurity.canUseProvider}
-     *       and blows up at runtime.</li>
-     *   <li>{@code encrypt} / {@code decrypt} <em>do</em> work in the native
-     *       binary because ofdrw-crypto's {@code UserPasswordEncryptor} uses
-     *       BC's <strong>lightweight crypto API</strong>
-     *       ({@code org.bouncycastle.crypto.engines.SM4Engine} +
-     *       {@code SM3.Digest}) directly — it never touches
-     *       {@code java.security.Security}, so the closed-world provider
-     *       check is irrelevant.</li>
+     *   <li>{@link SignCommand} — needs a BouncyCastleProvider that the
+     *       closed-world {@code JceSecurity.getVerificationResult} check in
+     *       GraalVM 25.0.4 CE refuses to verify for runtime-registered
+     *       providers (see oracle/graal#13412). Sign uses the JCE provider
+     *       API ({@code KeyStore.getInstance("PKCS12", "BC")} +
+     *       {@code JcaContentSignerBuilder}) which goes through
+     *       {@code JceSecurity.canUseProvider} and blows up at runtime.
+     *       Out of scope for v0.2.0; sign may be tackled in a future release
+     *       by migrating to {@code JcaPKCS12.engineLoad} or PKCS#12 BC
+     *       lightweight parsing.</li>
      *   <li>{@link ToHtmlCommand}, {@link ToSvgCommand} — HtmlMaker / SVGExporter
      *       extend AWTMaker, which on macOS triggers
      *       {@code sun/font/CFontManager} JNI lookups that fail with SIGABRT
      *       in the substrate VM.</li>
      * </ul>
+     *
+     * <p><strong>verify / validate</strong> are <em>now</em> registered
+     * (since v0.2.0 / ofdrw 2.4.0-openpdf.5). They used to need a
+     * BouncyCastleProvider for SM3withSM2 verify and SM3 digest, but
+     * ofdrw-gm migrated both to BC's <strong>lightweight crypto API</strong>
+     * ({@code GmVerifyHelper.sm3WithSm2Verify} +
+     * {@code GmVerifyHelper.sm3} / {@code newSm3}) that never touches
+     * {@code java.security.Security}. The {@code encrypt} / {@code decrypt}
+     * commands were already in this category via
+     * {@code org.bouncycastle.crypto.engines.SM4Engine}.</p>
      *
      * <p>{@link ToPdfCommand} <strong>is</strong> registered on the native
      * binary when ofdrw-converter {@code 2.4.0-openpdf.1} (or any later
@@ -99,6 +107,8 @@ public class Main implements Runnable {
             MergeCommand.class,
             EncryptCommand.class,
             DecryptCommand.class,
+            VerifyCommand.class,
+            ValidateCommand.class,
     };
 
     @Option(names = {"--json"}, scope = ScopeType.INHERIT,
