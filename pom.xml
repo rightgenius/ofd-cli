@@ -6,7 +6,7 @@
 
     <groupId>io.github.ofdcli</groupId>
     <artifactId>ofd-cli</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <packaging>jar</packaging>
 
     <name>ofd-cli</name>
@@ -26,15 +26,18 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <picocli.version>4.7.6</picocli.version>
-        <!-- ofdrw fork: 2.4.0-openpdf.2 from rightgenius/ofdrw replaces
+        <!-- ofdrw fork: 2.4.0-openpdf.3 from rightgenius/ofdrw replaces
              PDFBox with OpenPDF in the OFD→PDF exporter (PDFExporterOpenPDF),
              making to-pdf work in GraalVM native-image. PDF→OFD is broken
              in this variant (PDFConverter is a stub).
-             Sourced via JitPack (com.github.rightgenius:ofdrw-full:2.4.0-openpdf.2)
+             Sourced via JitPack (com.github.rightgenius:ofdrw-full:2.4.0-openpdf.3)
              so the CI can resolve the dependency without manually mvn install.
+             v2.4.0-openpdf.3 修两 bug:
+             - compositeOnWhite 修 OpenPDF SMask BC 黑底 (印章/二维码 alpha 区)
+             - clip().newPath() 修 OpenPDF W 后 current path 不重置 → 字符 path 被裁
              v2.4.0-openpdf.2 adds TTC font path support + macOS CJK aliases
              so embedded CJK (e.g. 发票示例.ofd) renders properly on macOS. -->
-        <ofdrw.version>2.4.0-openpdf.2</ofdrw.version>
+        <ofdrw.version>2.4.0-openpdf.3</ofdrw.version>
         <jackson.version>2.16.1</jackson.version>
 
         <native.maven.plugin.version>0.10.2</native.maven.plugin.version>
