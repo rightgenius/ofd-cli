@@ -1,6 +1,6 @@
 # ofd-cli
 
-> **OFD**（Open Fixed-layout Document，**版式文档**）命令行工具，基于 [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) 封装。
+> **OFD**（Open Fixed-layout Document，**版式文档**）命令行工具，基于 [ofdrw/ofdrw](https://github.com/ofdrw/ofdrw)（Apache 2.0 原版）封装，PDF 渲染底座改用 [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) 的 OpenPDF fork 以兼容 GraalVM native-image。
 > 专为 **AI Agent** 与**自动化流水线**设计：单文件静态二进制、标准化退出码、JSON 输出。
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
@@ -14,13 +14,17 @@
 
 ## 这是什么
 
-`ofd-cli` 把 Java 生态里最完善的 OFD 处理库 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw)（Apache 2.0，PDFBox → OpenPDF 1.3.39 fork）装进一个**单文件可执行二进制**里，零 JRE 依赖，可以直接被 shell、CI、AI agent 调用。
+`ofd-cli` 把 Java 生态里最完善的 OFD 处理库 [`ofdrw/ofdrw`](https://github.com/ofdrw/ofdrw)（Apache 2.0）装进一个**单文件可执行二进制**里，零 JRE 依赖，可以直接被 shell、CI、AI agent 调用。
+
+由于原版 `ofdrw/ofdrw` 的 PDF 渲染依赖 Apache PDFBox，PDFBox 在静态初始化时触发 `java.awt.image.ColorModel` → `Toolkit.<clinit>` → `System.loadLibrary("awt")`，在 GraalVM native-image 的 closed-world substrate VM 里没有 `libawt.dylib` 可加载，native binary 跑 `to-pdf` 直接 SIGABRT。
+
+为支持 native-image，本项目改用 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw) —— `ofdrw/ofdrw` 的 fork，把 PDF 底座从 PDFBox 切到 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF)（LGPL/MPL，可商用）并修了几处 GraalVM 兼容问题。详见 [上游](#上游) 段。
 
 它解决三件事：
 
 1. **AI Agent 友好**——标准化退出码、`--json` 全局 flag、日志走 stderr、结果走 stdout。
 2. **零部署摩擦**——把 jar 编译成 native binary，用户机器不需要任何 Java 运行时。
-3. **不重复造轮子**——所有 OFD 解析、渲染、签名、加密逻辑都委托给 rightgenius/ofdrw，本项目只做 CLI 包装和 native 编译。
+3. **不重复造轮子**——所有 OFD 解析、渲染、签名、加密逻辑都委托给 ofdrw，本项目只做 CLI 包装和 native 编译。
 
 适用场景：
 
@@ -204,7 +208,7 @@ ofd to-png invoice.ofd --no-default-fonts            # 跳过系统字体扫描
 
 ### `to-pdf <file> -o <out.pdf>`
 
-渲染为 PDF。基于 [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) 的 OpenPDF 1.3.39 fork（**LGPL/MPL**，可商用），native-image 下不再触发 AWT FontManager JNI 失败，**macOS 中文 / 拉丁混排正常渲染**（TTC 字体自动加 `,0` sub-font 语法）。
+渲染为 PDF。PDF 渲染基于 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw) 的 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF) fork（**LGPL/MPL**，可商用），native-image 下不再触发 AWT FontManager JNI 失败，**macOS 中文 / 拉丁混排正常渲染**（TTC 字体自动加 `,0` sub-font 语法）。OFD 解析等其他部分仍用原版 [ofdrw/ofdrw](https://github.com/ofdrw/ofdrw)。
 
 ```bash
 ofd to-pdf invoice.ofd -o out/invoice.pdf
@@ -444,14 +448,38 @@ mvn -o test
 
 ## 上游
 
-`ofd-cli` 是 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw) 的**命令行包装层**，所有 OFD 解析、渲染、签名、加密能力都来自 rightgenius/ofdrw。
+`ofd-cli` 是 `ofdrw` 生态的**命令行包装层**。本项目**不**修改 `ofdrw` 本身的 OFD 解析 / 渲染 / 签名 / 加密逻辑 —— 那些能力全部来自上游。
 
-- **上游项目**：[rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) — Apache 2.0
-- **本项目**：CLI 封装 + native-image 编译 + 字体 bootstrap + 标准化退出码 / JSON 输出
+### 真正的上游
 
-> 上游 `rightgenius/ofdrw` 是对原 `ofdrw/ofdrw` 的 fork，因为 PDFBox 依赖触发 AWT 在 GraalVM native-image 下不可用，所以 PDF 渲染底座切到 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF)（LGPL/MPL，可商用），并修复了若干 OpenPDF 自身的 PDF spec 违规。
+- **原版上游**：[ofdrw/ofdrw](https://github.com/ofdrw/ofdrw) — Apache 2.0，Java 生态里最完善的 OFD 处理库
+- **本项目**：[rightgenius/ofd-cli](https://github.com/rightgenius/ofd-cli) — CLI 封装 + native-image 编译 + 字体 bootstrap + 标准化退出码 / JSON 输出
 
-如果你发现 OFD 处理逻辑层面的 bug，先去上游 [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) 反馈；如果是 CLI 体验、native 编译、Agent 集成相关的问题，在本仓库开 issue。
+### 为什么还有一个 `rightgenius/ofdrw`
+
+`ofdrw/ofdrw` 的 PDF 渲染依赖 Apache PDFBox，PDFBox 在 GraalVM native-image 下不可用（见上文）。所以**本项目额外维护了一个 fork**：
+
+- **GraalVM 兼容 fork**：[rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) — `feature/openpdf-replacement` 分支，Apache 2.0
+- **用途**：本项目只依赖此 fork 的 `ofdrw-converter` 渲染 PDF；其他子模块（`ofdrw-crypto` / `ofdrw-gm` / `ofdrw-sign` / `ofdrw-layout` …）仍用原版 `ofdrw/ofdrw`
+
+### `rightgenius/ofdrw` 相对原版改了哪些
+
+相对于 `ofdrw/ofdrw` 的 commit `7df66b68` 之后的所有改动都集中在 `ofdrw-converter`（PDF 渲染层），按重要性排序：
+
+| 改动 | 类别 | 解决的问题 |
+|---|---|---|
+| **PDFBox → OpenPDF 1.3.39** | 主要 | PDFBox `PDDocument.<clinit>` 在 native-image 触发 AWT `UnsatisfiedLinkError`；OpenPDF 是纯 Java fork，无 native 依赖 |
+| **OpenPDF `Image` SMask BC 默认黑底** → 用 explicit `/Mask` 替换 | 主要 | 真实 OFD 平台生成的电子发票带 alpha 通道图，OpenPDF 1.3.39 把 alpha 透明区默认填成黑色；改用 PDF spec 推荐的 explicit `/Mask` 方案，印章 alpha 透出底层红字 |
+| **OpenPDF `clip()` 不重置 current path** → `clip()` 后立刻 `newPath()` | 重要 | PDF spec 8.5.4 要求 W 算子消耗 path；OpenPDF 不重置，导致字符 path 跟 page rect 走 non-zero winding 抵消，字符被裁 |
+| **TTC 字体路径加 `,0` sub-font 后缀** | 重要 | macOS 中文 CJK 字体都是 TTC 集合（PingFang.ttc / STSong.ttc …），OpenPDF `TrueTypeCollection` 需要 `path,0` 语法，否则静默失败 → 中文渲染为空 |
+| **`org.ofdrw.gm.GmProviders`** 统一封装 BC provider 获取 | 次要 | 让应用层能用同一入口拿 provider，方便后续做 GraalVM 兼容层 |
+
+历史 tag：`v2.4.0-openpdf.1` / `.2` / `.3` / `.4`。详见 [rightgenius/ofdrw release 页](https://github.com/rightgenius/ofdrw/tags)。
+
+### 在哪里报 bug
+
+- **OFD 解析 / 渲染 / 签名 / 加密的逻辑 bug** → 优先去上游 [`ofdrw/ofdrw`](https://github.com/ofdrw/ofdrw) issue；如果能稳定复现的输入只跟 fork 的 OpenPDF 路径相关，去 [`rightgenius/ofdrw`](https://github.com/rightgenius/ofdrw)
+- **CLI 体验 / native-image 编译 / AI agent 集成 / 字体 bootstrap** → 在本仓库 [`rightgenius/ofd-cli`](https://github.com/rightgenius/ofd-cli) 开 issue
 
 ---
 
@@ -566,7 +594,8 @@ ofd to-png invoice.ofd -o /tmp/invoice/ && ls /tmp/invoice/
 
 包含的第三方组件各自的许可见 fat-jar 内 `META-INF/NOTICE.*` 文件：
 
-- [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) — Apache 2.0
+- [ofdrw/ofdrw](https://github.com/ofdrw/ofdrw) — Apache 2.0（原版 OFD 解析 / 渲染 / 签名 / 加密）
+- [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) — Apache 2.0（PDF 渲染 fork）
 - [BouncyCastle](https://www.bouncycastle.org/) — MIT
 - [OpenPDF](https://github.com/LibrePDF/OpenPDF) — LGPL/MPL
 - [Picocli](https://picocli.info/) — Apache 2.0

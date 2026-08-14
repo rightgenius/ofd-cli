@@ -5,7 +5,7 @@ description: Process OFD (Open Fixed-layout Document, China 版式文档) files.
 
 # ofd-cli
 
-CLI wrapper around the [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw) library (OpenPDF 1.3.39 fork). Single-file native binary, zero JRE dependency, designed for AI agent subprocess calls.
+CLI wrapper around the [ofdrw/ofdrw](https://github.com/ofdrw/ofdrw) library. PDF rendering uses [rightgenius/ofdrw](https://github.com/rightgenius/ofdrw)'s OpenPDF 1.3.39 fork (Apache 2.0) so the native binary works under GraalVM. Single-file native binary, zero JRE dependency, designed for AI agent subprocess calls.
 
 ## When to use me
 
