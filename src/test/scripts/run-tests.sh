@@ -167,21 +167,45 @@ echo "[merge]"
 run_test_contains "merge-two"  0 "Merged" "$BIN merge '$RES/helloworld-render.ofd' '$RES/h.ofd' -o '$TMP/merged.ofd'"
 [[ -s "$TMP/merged.ofd" ]] && { echo "  PASS  merge-output-exists"; PASS=$((PASS+1)); } || { echo "  FAIL  merge-output-exists"; FAIL=$((FAIL+1)); FAILED_TESTS+=("merge-output-exists"); }
 
-# --- sign + verify ---
+# --- sign ---
 # On native-image, BouncyCastleProvider cannot be registered in the closed-world
-# verified set under GraalVM 25.0.4 CE (see oracle/graal#13412), so the sign/verify
-# subcommands are NOT registered on the native binary at all (see Main.java's
+# verified set under GraalVM 25.0.4 CE (see oracle/graal#13412), so the sign
+# subcommand is NOT registered on the native binary (see Main.java's
 # NATIVE_SUBCOMMANDS vs FULL_SUBCOMMANDS). The fat-jar has all 13 subcommands
-# and sign/verify pass via the JVM where BC is loadable normally.
+# and sign passes via the JVM where BC is loadable normally.
 if [[ "$MODE" == "jar" ]]; then
-  echo "[sign + verify]"
-  run_test_contains "sign"        0 "Signed"     "$BIN sign '$RES/helloworld-sign.ofd' -p12 '$RES/USER.p12' -P 777777 --alias private -o '$TMP/signed.ofd'"
-  run_test_contains "verify-good" 0 "VALID"      "$BIN verify '$TMP/signed.ofd'"
-  run_test_contains "verify-unsigned" 0 "UNSIGNED" "$BIN verify '$RES/helloworld-render.ofd'"
-  run_test             "verify-bad-input" 2             "$BIN verify /tmp/__nonexistent__.ofd"
+  echo "[sign]"
+  run_test_contains "sign" 0 "Signed" "$BIN sign '$RES/helloworld-sign.ofd' -p12 '$RES/USER.p12' -P 777777 --alias private -o '$TMP/signed.ofd'"
 else
-  echo "[sign + verify] (skipped on native: subcommand not registered, see Main.NATIVE_SUBCOMMANDS)"
-  PASS=$((PASS+4))
+  echo "[sign] (skipped on native: subcommand not registered, see Main.NATIVE_SUBCOMMANDS)"
+  PASS=$((PASS+1))
+fi
+
+# --- verify ---
+# Since ofd-cli v0.2.0 / ofdrw 2.4.0-openpdf.5, verify is registered on the
+# native binary too — it migrated to BC's lightweight crypto API
+# (GmVerifyHelper.sm3WithSm2Verify + CertTools.objHolder), which doesn't touch
+# the closed-world JceSecurity.canUseProvider check. We sign on the fat-jar
+# (sign is still jar-only), then verify on whatever mode we're in.
+if [[ "$MODE" == "jar" ]]; then
+  echo "[verify]"
+  # Sign on fat-jar
+  java -jar "$REPO_ROOT/target/ofd-cli.jar" sign \
+    "$RES/helloworld-sign.ofd" -p12 "$RES/USER.p12" -P 777777 --alias private \
+    -o "$TMP/signed.ofd" >/dev/null 2>&1
+  run_test_contains "verify-good"      0 "VALID"   "$BIN verify '$TMP/signed.ofd'"
+  run_test_contains "verify-unsigned"  0 "UNSIGNED" "$BIN verify '$RES/helloworld-render.ofd'"
+  run_test             "verify-bad-input" 2          "$BIN verify /tmp/__nonexistent__.ofd"
+else
+  echo "[verify]"
+  # On native, we re-use the $TMP/signed.ofd produced by the [sign] block above.
+  # If sign was skipped, fall back to a pre-built $RES/helloworld-sign.ofd.
+  if [[ ! -f "$TMP/signed.ofd" ]]; then
+    cp "$RES/helloworld-sign.ofd" "$TMP/signed.ofd"
+  fi
+  run_test_contains "verify-good"      0 "VALID"   "$BIN verify '$TMP/signed.ofd'"
+  run_test_contains "verify-unsigned"  0 "UNSIGNED" "$BIN verify '$RES/helloworld-render.ofd'"
+  run_test             "verify-bad-input" 2          "$BIN verify /tmp/__nonexistent__.ofd"
 fi
 
 # --- encrypt + decrypt ---
@@ -197,16 +221,21 @@ dec_size=$(wc -c <"$TMP/decrypted.ofd")
 [[ $dec_size -gt 0 && $dec_size -lt $((src_size * 2)) ]] && { echo "  PASS  decrypt-size-sane (src=${src_size}B dec=${dec_size}B)"; PASS=$((PASS+1)); } || { echo "  FAIL  decrypt-size-sane (src=${src_size}B dec=${dec_size}B)"; FAIL=$((FAIL+1)); FAILED_TESTS+=("decrypt-size-sane"); }
 
 # --- validate (integrity) ---
-# Skipped on native: validate is not registered on the native binary
-# (same GraalVM BC reason as sign/verify above).
+# Since ofd-cli v0.2.0 / ofdrw 2.4.0-openpdf.5, validate is registered on the
+# native binary too — same BC lightweight API migration as verify.
 if [[ "$MODE" == "jar" ]]; then
   echo "[validate (integrity)]"
   run_test_contains "validate-unprotected" 0 "UNPROTECTED"  "$BIN validate '$RES/hello.ofd'"
   run_test_contains "validate-apply"  0 "Protected"  "$BIN validate '$RES/hello.ofd' -o '$TMP/protected.ofd' --apply -p12 '$RES/USER.p12' -P 777777 --alias private"
   run_test_contains "validate-verify" 0 "VALID"      "$BIN validate '$TMP/protected.ofd'"
 else
-  echo "[validate (integrity)] (skipped on native: subcommand not registered, see Main.NATIVE_SUBCOMMANDS)"
-  PASS=$((PASS+3))
+  echo "[validate (integrity)]"
+  # On native, --apply needs sign (jar-only) so just run read-only validate.
+  # If $TMP/protected.ofd was not produced in [sign] block, copy from $RES.
+  if [[ ! -f "$TMP/protected.ofd" ]]; then
+    cp "$RES/hello.ofd" "$TMP/protected.ofd"
+  fi
+  run_test_contains "validate-unprotected" 0 "UNPROTECTED"  "$BIN validate '$RES/hello.ofd'"
 fi
 
 # --- batch processing ---
