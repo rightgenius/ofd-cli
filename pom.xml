@@ -6,7 +6,7 @@
 
     <groupId>io.github.ofdcli</groupId>
     <artifactId>ofd-cli</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
 
     <name>ofd-cli</name>
@@ -26,13 +26,13 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <picocli.version>4.7.6</picocli.version>
-        <!-- ofdrw fork: 2.4.0-openpdf.6 from rightgenius/ofdrw replaces
+        <!-- ofdrw fork: 2.4.0-openpdf.7 from rightgenius/ofdrw replaces
              PDFBox with OpenPDF in the OFD→PDF exporter (PDFExporterOpenPDF),
              making to-pdf work in GraalVM native-image. PDF→OFD is broken
              in this variant (PDFConverter is a stub).
              Resolved via local mvn install in CI (fork is cloned + mvn install
              from the tagged release); JitPack is no longer used. -->
-        <ofdrw.version>2.4.0-openpdf.6</ofdrw.version>
+        <ofdrw.version>2.4.0-openpdf.7</ofdrw.version>
         <jackson.version>2.16.1</jackson.version>
 
         <native.maven.plugin.version>0.10.2</native.maven.plugin.version>
@@ -65,7 +65,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- rightgenius/ofdrw 2.4.0-openpdf.6 (PDFBox -> OpenPDF fork + native verify/validate).
+        <!-- rightgenius/ofdrw 2.4.0-openpdf.7 (PDFBox -> OpenPDF fork + native verify/validate).
              Built and installed to local m2 by .github/workflows/release.yml
              from the tagged fork release; no remote repo lookup. -->
         <dependency>

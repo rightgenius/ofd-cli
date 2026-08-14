@@ -3,11 +3,11 @@ package io.github.ofdcli.cmd;
 import io.github.ofdcli.ExitCode;
 import io.github.ofdcli.Main;
 import io.github.ofdcli.json.JsonWriter;
-import org.ofdrw.crypto.integrity.GMProtectSigner;
+import org.ofdrw.crypto.integrity.GMProtectSignerLight;
 import org.ofdrw.crypto.integrity.GMProtectVerifier;
 import org.ofdrw.crypto.integrity.OFDIntegrity;
 import org.ofdrw.crypto.integrity.OFDIntegrityVerifier;
-import org.ofdrw.gm.cert.PKCS12Tools;
+import org.ofdrw.gm.cert.PKCS12ToolsLight;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -15,8 +15,6 @@ import picocli.CommandLine.ParentCommand;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.util.concurrent.Callable;
 
 /**
@@ -92,10 +90,11 @@ public class ValidateCommand implements Callable<Integer> {
 
         long t0 = System.currentTimeMillis();
         try {
-            String aliasName = alias != null ? alias : password;
-            PrivateKey prvKey = PKCS12Tools.ReadPrvKey(pkcs12, aliasName, password);
-            Certificate cert = PKCS12Tools.ReadUserCert(pkcs12, aliasName, password);
-            GMProtectSigner signer = new GMProtectSigner(prvKey, cert);
+            // 走 BC 轻量级 API：PKCS12ToolsLight 解 .p12 + GMProtectSignerLight 签 SM2+SM3
+            // 跟 sign / verify 一样，不触发 JceSecurity.canUseProvider 校验，
+            // native binary 也能跑 validate --apply
+            PKCS12ToolsLight.Result p12 = PKCS12ToolsLight.read(pkcs12, password.toCharArray());
+            GMProtectSignerLight signer = new GMProtectSignerLight(p12.certHolder, p12.privateKey);
             try (OFDIntegrity integ = new OFDIntegrity(input, output)) {
                 integ.protect(signer);
             }

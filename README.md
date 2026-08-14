@@ -53,7 +53,7 @@ curl -fsSL https://raw.githubusercontent.com/rightgenius/ofd-cli/main/scripts/in
 6. 跑 `ofd --version` 验证
 
 环境变量：
-- `OFD_VERSION=v0.3.0` — 锁定特定版本（默认：latest）
+- `OFD_VERSION=v0.4.0` — 锁定特定版本（默认：latest）
 - `OFD_INSTALL_DIR=/path` — 覆盖安装位置
 
 ### Homebrew（待发布）
@@ -152,9 +152,9 @@ $ ofd info invoice.ofd --json | jq '.'
 | 维度 | `ofd`（native binary） | `ofd-cli.jar`（fat-jar） |
 |---|---|---|
 | 启动时间 | < 50 ms | ~500 ms |
-| 大小 | 58 MB | 34 MB |
+| 大小 | 53 MB | 34 MB |
 | JRE 依赖 | 无 | 需要 JRE 11+ |
-| 子命令数 | **11** | **13** |
+| 子命令数 | **12** | **13** |
 
 native binary 是首选。fat-jar 是兜底——当 native 缺某个子命令时用它。
 
@@ -176,10 +176,8 @@ native binary 是首选。fat-jar 是兜底——当 native 缺某个子命令�
 | `verify` | 验签 | ✅ | ✅ |
 | `encrypt` | 密码加密 | ✅ | ✅ |
 | `decrypt` | 密码解密 | ✅ | ✅ |
-| `validate` | 完整性校验（GM/T 0099） | ✅¹ | ✅ |
+| `validate` | 完整性校验（GM/T 0099） | ✅ | ✅ |
 
-> ¹ `validate` 读路径在 native binary 也支持（GB/T 0099 完整性 + 防夹带检查）；但 `validate --apply`（写保护）仍只 fat-jar 支持，因为生成 OFDEntries.xml 用的 MAC 走完整 JCE 路径（见 [Native 二进制限制](#native-二进制限制)）。
->
 > ❌ 标在 native 上的子命令是被**故意隐藏**的（不是有 bug）——见 [Native 二进制限制](#native-二进制限制) 一节。
 
 ---
@@ -352,7 +350,7 @@ else:
 
 ## Native 二进制限制
 
-v0.3.0 之前，native binary 出于 GraalVM closed-world 的 JCE provider 限制，**故意不注册** 5 个子命令（`sign` / `verify` / `validate` / `to-html` / `to-svg`）。v0.3.0 起，**`sign` / `verify` / `validate`（读）已经迁到 BouncyCastle 轻量级 crypto API，native binary 也支持了**——只剩 `to-html` / `to-svg` 因为 AWT 限制仍 fat-jar only。
+v0.4.0 之前，native binary 出于 GraalVM closed-world 的 JCE provider 限制，**故意不注册** 5 个子命令（`sign` / `verify` / `validate` / `to-html` / `to-svg`）。v0.4.0 起，**`sign` / `verify` / `validate`（读 + 写）全部迁到 BouncyCastle 轻量级 crypto API，native binary 也支持了**——只剩 `to-html` / `to-svg` 因为 AWT 限制仍 fat-jar only。
 
 **为什么不注册而不是 fail gracefully**（适用 `to-html` / `to-svg`）：CLI 不会因为「子命令注册了但运行报错」比「子命令不存在」更友好。报 `Unknown command` 明确告诉用户「这个 binary 没这个能力，去看文档」；报 UnsatisfiedLinkError 只会让用户怀疑这是 bug。
 
@@ -362,16 +360,17 @@ v0.3.0 之前，native binary 出于 GraalVM closed-world 的 JCE provider 限�
 |---|---|
 | `to-html` / `to-svg` | AWTMaker 父类触发 `sun/font/CFontManager` JNI — macOS 字体管理器在 native-image 下无法解析 → SIGABRT |
 
-**`sign` / `verify` / `validate`（读）怎么搞定的**（v0.3.0 的核心改动）：原本这三个走 JCE provider API（`Signature.getInstance("SM3WithSM2", "BC")`），GraalVM 25.x CE 的 closed-world `JceSecurity.getVerificationResult` 校验不允许 build time 之后注册 provider（[oracle/graal#13412](https://github.com/oracle/graal/issues/13412)）。v0.3.0 把这三处都迁到 BC 轻量级 crypto API：
+**`sign` / `verify` / `validate` 怎么搞定的**（v0.3.0 + v0.4.0 的核心改动）：原本这几个走 JCE provider API（`Signature.getInstance("SM3WithSM2", "BC")`），GraalVM 25.x CE 的 closed-world `JceSecurity.getVerificationResult` 校验不允许 build time 之后注册 provider（[oracle/graal#13412](https://github.com/oracle/graal/issues/13412)）。v0.3.0 迁 verify / validate (读)，v0.4.0 迁 sign + validate --apply：
 
-| 原 JCE 调用 | 轻量级 BC 替代 |
-|---|---|
-| `KeyStore.getInstance("PKCS12", "BC")` + `ks.getKey/getCert` | `PKCS12PfxPdu` + `PKCS12SafeBagFactory` + `BcPKCS12PBEInputDecryptorProviderBuilder` |
-| `Signature.getInstance("SM3withSM2", "BC")` + `initVerify/Sign` + `update/verify/sign` | `SM2Signer` + `ECPublicKeyParameters` / `ECPrivateKeyParameters` + `update/generateSignature/verifySignature` |
-| `MessageDigest.getInstance("SM3", "BC")`（Reference 文件 SM3） | `SM3Digest`（同输出，更轻量） |
-| `MessageDigest.getInstance("SHA-256", "BC")` | `MessageDigest.getInstance("SHA-256")`（JDK 自带） |
-| `JcaX509CertificateConverter().setProvider("BC")` | `X509CertificateHolder`（BC ASN.1 结构） |
-| `JcePKCSPBEInputDecryptorProviderBuilder` | `BcPKCS12PBEInputDecryptorProviderBuilder` |
+| 原 JCE 调用 | 轻量级 BC 替代 | 引入版本 |
+|---|---|---|
+| `KeyStore.getInstance("PKCS12", "BC")` + `ks.getKey/getCert` | `PKCS12PfxPdu` + `PKCS12SafeBagFactory` + `BcPKCS12PBEInputDecryptorProviderBuilder` | v0.3.0 |
+| `Signature.getInstance("SM3withSM2", "BC")` + `initVerify/Sign` + `update/verify/sign` | `SM2Signer` + `ECPublicKeyParameters` / `ECPrivateKeyParameters` + `update/generateSignature/verifySignature` | v0.3.0（验） / v0.4.0（签） |
+| `MessageDigest.getInstance("SM3", "BC")`（Reference 文件 SM3） | `SM3Digest`（同输出，更轻量） | v0.3.0 |
+| `MessageDigest.getInstance("SHA-256", "BC")` | `MessageDigest.getInstance("SHA-256")`（JDK 自带） | v0.3.0 |
+| `JcaX509CertificateConverter().setProvider("BC")` | `X509CertificateHolder`（BC ASN.1 结构） | v0.3.0 |
+| `JcePKCSPBEInputDecryptorProviderBuilder` | `BcPKCS12PBEInputDecryptorProviderBuilder` | v0.4.0（`validate --apply`） |
+| `GMProtectSigner`（`Signature.getInstance(..., "BC")`） | `GMProtectSignerLight`（`SM2Signer` 走轻量级） | v0.4.0（`validate --apply`） |
 
 完整支持矩阵：
 
@@ -381,21 +380,17 @@ v0.3.0 之前，native binary 出于 GraalVM closed-world 的 JCE provider 限�
 | `to-png`, `to-pdf`, `extract`, `merge` | ✅ | ✅ |
 | `encrypt`, `decrypt` | ✅ | ✅ |
 | `sign`, `verify` | ✅ | ✅ |
-| `validate`（读） | ✅ | ✅ |
-| `validate --apply`（写保护） | ❌¹ | ✅ |
+| `validate`（读 + `--apply`） | ✅ | ✅ |
 | `to-html`, `to-svg` | ❌ 不注册 | ✅ |
 
-需要 `--apply` / `to-html` / `to-svg` 时直接用 fat-jar：
+需要 `to-html` / `to-svg` 时直接用 fat-jar：
 
 ```bash
-java -jar ofd-cli.jar validate invoice.ofd --apply -o protected.ofd \
-    -p12 cert.p12 -P pwd --alias private
 java -jar ofd-cli.jar to-html invoice.ofd -o out/invoice.html
+java -jar ofd-cli.jar to-svg invoice.ofd -o out/
 ```
 
 CLI 自身的 `--help` 页脚会列出两种发行版的差异，无需读 README 也能看到。
-
-¹ `validate --apply` 需要生成 OFDEntries.xml（含 SM2 签名 + MAC），用到的 `GMProtectSigner` 走完整 JCE 路径（`Signature.getInstance(..., new BouncyCastleProvider())`），GraalVM 25.0.4 CE 即使用 `-H:AdditionalSecurityProviders=org.bouncycastle.jce.provider.BouncyCastleProvider` 也只是实验性支持，build 时仍可能报 `java.lang.SecurityException`。要把 `validate --apply` 也迁到 native，需要把 ofdrw-crypto 的 `GMProtectSigner` 也换成轻量级 API（跟 `sign` 路径一样）。这是后续 PR 的工作。
 
 ---
 
@@ -449,7 +444,7 @@ mvn -Pnative -DskipTests clean package
 # 单元测试（JUnit 5，几秒钟）
 mvn -o test
 
-# 集成测试（fat-jar 39 用例，native 37 用例 — native 少 to-pdf + validate --apply）
+# 集成测试（fat-jar 39 用例，native 39 用例 — native 已覆盖 to-pdf + validate --apply）
 ./src/test/scripts/run-tests.sh -m jar     # fat-jar
 ./src/test/scripts/run-tests.sh -m native   # native binary
 ```
@@ -471,7 +466,21 @@ native 二进制大（56 MB vs 34 MB）但启动快 36x，CI 流水线、agent l
 
 ## 变更日志
 
-### v0.3.0（最新）
+### v0.4.0（最新）
+
+**`validate --apply` 在 native binary 上也跑通了**——`sign` / `verify` / `validate`（读 + 写）三个子命令在 native 都支持。`to-html` / `to-svg` 仍 fat-jar only。
+
+依赖 `rightgenius/ofdrw` 升到 2.4.0-openpdf.7，把 ofdrw-crypto 里 `GMProtectSigner` 走的 JCE provider API 迁到 BC 轻量级 crypto API：
+
+- `ofdrw-crypto` 新增 `GMProtectSignerLight`（`SM2Signer` + `ECPrivateKeyParameters` 走 `GmVerifyHelper.sm3WithSm2Sign`，证书用 `X509CertificateHolder`）替代 `GMProtectSigner`（JCE `Signature.getInstance("SM3WithSM2", "BC")`）
+- `ofd-cli` `ValidateCommand` 切到 `PKCS12ToolsLight` + `GMProtectSignerLight`
+- `OFDIntegrity.protect(ProtectSigner)` 接口不变，新实现 plug-in；老的 `GMProtectSigner`（JCE）保留给老调用方
+
+native binary 子命令数：**11 → 12**（`validate --apply` 也支持了）。native binary 体积从 58 MB 缩到 53 MB（reflection 闭合变紧）。
+
+> BC SM2 sign 是 non-deterministic（随机 k，类似 ECDSA），同一明文两次签名的 `r||s` 字节不一样，但都能被同一 `OFDIntegrityVerifier` + `GMProtectVerifier` 接受。fat-jar 和 native 签的输出互相能识别（4/4 cross-compat 组合测过）。
+
+### v0.3.0
 
 **`sign` / `verify` / `validate`（读）在 native binary 跑通**——`to-html` / `to-svg` 仍 fat-jar only。
 
@@ -534,7 +543,7 @@ native binary 子命令数：**8 → 11**（加了 sign / verify / validate）�
 欢迎 PR 和 issue。建议优先方向：
 
 - ✅ ~~修复 GraalVM BC provider 限制，让 native binary 也支持 sign/verify/validate~~ （v0.3.0 完成）
-- 🎯 修复 `validate --apply` 在 native 上的完整 JCE 路径（需要把 ofdrw-crypto 的 `GMProtectSigner` 也迁到轻量级 API）
+- ✅ ~~修复 `validate --apply` 在 native 上的完整 JCE 路径~~ （v0.4.0 完成：`GMProtectSignerLight` 走 BC 轻量级 API）
 - 🎯 修复 `to-pdf` / `to-html` / `to-svg` 在 native 上的 AWT CFontManager 问题
 - 📦 新平台/架构的 native binary（Linux ARM64、Alpine、RISC-V）
 - 🐛 边界 OFD 文件的解析兼容性

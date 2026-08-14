@@ -227,8 +227,10 @@ dec_size=$(wc -c <"$TMP/decrypted.ofd")
 [[ $dec_size -gt 0 && $dec_size -lt $((src_size * 2)) ]] && { echo "  PASS  decrypt-size-sane (src=${src_size}B dec=${dec_size}B)"; PASS=$((PASS+1)); } || { echo "  FAIL  decrypt-size-sane (src=${src_size}B dec=${dec_size}B)"; FAIL=$((FAIL+1)); FAILED_TESTS+=("decrypt-size-sane"); }
 
 # --- validate (integrity) ---
-# Since ofd-cli v0.2.0 / ofdrw 2.4.0-openpdf.5, validate is registered on the
-# native binary too — same BC lightweight API migration as verify.
+# Since ofd-cli v0.2.0 / ofdrw 2.4.0-openpdf.5, validate (read) is registered on
+# the native binary. Since v0.4.0 / 2.4.0-openpdf.7, validate --apply also works
+# on the native binary — ofdrw-crypto's GMProtectSignerLight uses BC lightweight
+# API (GmVerifyHelper.sm3 + sm3WithSm2Sign) so no JCE provider registration needed.
 if [[ "$MODE" == "jar" ]]; then
   echo "[validate (integrity)]"
   run_test_contains "validate-unprotected" 0 "UNPROTECTED"  "$BIN validate '$RES/hello.ofd'"
@@ -236,12 +238,14 @@ if [[ "$MODE" == "jar" ]]; then
   run_test_contains "validate-verify" 0 "VALID"      "$BIN validate '$TMP/protected.ofd'"
 else
   echo "[validate (integrity)]"
-  # On native, --apply needs sign (jar-only) so just run read-only validate.
-  # If $TMP/protected.ofd was not produced in [sign] block, copy from $RES.
+  # native: --apply also works (v0.4.0+ via GMProtectSignerLight)
   if [[ ! -f "$TMP/protected.ofd" ]]; then
-    cp "$RES/hello.ofd" "$TMP/protected.ofd"
+    "$BIN" validate "$RES/hello.ofd" --apply -o "$TMP/protected.ofd" \
+      -p12 "$RES/USER.p12" -P 777777 --alias private >/dev/null 2>&1
   fi
   run_test_contains "validate-unprotected" 0 "UNPROTECTED"  "$BIN validate '$RES/hello.ofd'"
+  run_test_contains "validate-apply"  0 "Protected"  "$BIN validate '$RES/hello.ofd' --apply -o '$TMP/protected2.ofd' -p12 '$RES/USER.p12' -P 777777"
+  run_test_contains "validate-verify" 0 "VALID"      "$BIN validate '$TMP/protected.ofd'"
 fi
 
 # --- batch processing ---
