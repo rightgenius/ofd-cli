@@ -45,11 +45,12 @@ curl -fsSL https://raw.githubusercontent.com/rightgenius/ofd-cli/main/scripts/in
 1. 识别你的平台（macOS arm64 / Linux x64 / Linux arm64）
 2. 从最新 [GitHub Release](https://github.com/rightgenius/ofd-cli/releases/latest) 下载对应的 native binary
 3. 校验 SHA-256 哈希
-4. 安装到 `/usr/local/bin/ofd`（有写权限）或 `~/.local/bin/ofd`（无 sudo 时）
-5. 跑 `ofd --version` 验证
+4. 同时下载 binary 所需的 `lib*.dylib` / `lib*.so`（macOS AWT 依赖，必须跟 binary 同目录）
+5. 安装到 `/usr/local/bin/ofd`（有写权限）或 `~/.local/bin/ofd`（无 sudo 时）
+6. 跑 `ofd --version` 验证
 
 环境变量：
-- `OFD_VERSION=v0.1.0` — 锁定特定版本（默认：latest）
+- `OFD_VERSION=v0.1.4` — 锁定特定版本（默认：latest）
 - `OFD_INSTALL_DIR=/path` — 覆盖安装位置
 
 ### Homebrew（待发布）
@@ -109,8 +110,8 @@ sha256sum -c --ignore-missing SHA256SUMS
 
 ```bash
 $ ofd --version
-ofd-cli 0.1.0
-  commit: 6498739
+ofd-cli 0.1.4
+  commit: 3d8a435
   java:   25.0.4 (GraalVM Community)
   os:     Mac OS X aarch64
 
@@ -150,7 +151,7 @@ $ ofd info invoice.ofd --json | jq '.'
 | 启动时间 | < 100 ms | ~500 ms |
 | 大小 | 54 MB | 33 MB |
 | JRE 依赖 | 无 | 需要 JRE 11+ |
-| 子命令数 | **7** | **13** |
+| 子命令数 | **8** | **13** |
 
 native binary 是首选。fat-jar 是兜底——当 native 缺某个子命令时用它。
 
@@ -163,7 +164,7 @@ native binary 是首选。fat-jar 是兜底——当 native 缺某个子命令�
 | `version` | 版本信息 | ✅ | ✅ |
 | `info` | 文档元数据（页数、签名、附件） | ✅ | ✅ |
 | `to-png` | 渲染为 PNG（默认 192 dpi） | ✅ | ✅ |
-| `to-pdf` | 渲染为 PDF（PDFBox 2.x） | ❌ | ✅ |
+| `to-pdf` | 渲染为 PDF（OpenPDF 1.3.39 fork） | ✅ | ✅ |
 | `to-html` | 渲染为 HTML（含 SVG 资源） | ❌ | ✅ |
 | `to-svg` | 渲染为 SVG（每页一个文件） | ❌ | ✅ |
 | `extract` | 提取纯文本 | ✅ | ✅ |
@@ -203,12 +204,18 @@ ofd to-png invoice.ofd --no-default-fonts            # 跳过系统字体扫描
 
 ### `to-pdf <file> -o <out.pdf>`
 
-转换为 PDF（PDFBox 2.x，**非 AGPL**，可商用）。
+转换为 PDF。使用 [`rightgenius/ofdrw` 2.4.0-openpdf.2 fork](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.2)，
+底座从 PDFBox 切到 [OpenPDF 1.3.39](https://github.com/LibrePDF/OpenPDF)（**LGPL/MPL**，可商用），native-image 下不再
+触发 AWT FontManager JNI 失败，**macOS 中文 / 拉丁混排正常渲染**（TTC 字体自动加 `,0` sub-font 语法）。
 
 ```bash
 ofd to-pdf invoice.ofd -o out/invoice.pdf
 ofd to-pdf invoice.ofd -o out/ --pages 1-3          # 指定页码
 ```
+
+> 💡 v0.1.4 修了一个微妙的 CI bug：GraalVM 25.2+ emit 的 `libjava.dylib` 是 35KB 静态链接 shim，
+> 旧版 release.yml Stage 步骤无脑 `cp $JAVA_HOME/lib/lib*.dylib` 会把它覆盖成 185KB JDK 全功能版，
+> 导致 AWT 链接失败 (`UnsatisfiedLinkError`)。修法是 `if not exists` 兜底。
 
 ### `to-html <file> -o <out.html>`
 
@@ -345,26 +352,27 @@ else:
 
 ## Native 二进制限制
 
-native binary 出于以下原因**故意不注册** 6 个子命令（`sign` / `verify` / `validate` / `to-pdf` / `to-html` / `to-svg`）——它们注册了也跑不起来，干脆不暴露给用户。
+native binary 出于以下原因**故意不注册** 5 个子命令（`sign` / `verify` / `validate` / `to-html` / `to-svg`）——它们注册了也跑不起来，干脆不暴露给用户。
 
 **为什么不注册而不是 fail gracefully**：CLI 不会因为「子命令注册了但运行报错」比「子命令不存在」更友好。报 `Unknown command` 明确告诉用户「这个 binary 没这个能力，去看文档」；报 UnsatisfiedLinkError 只会让用户怀疑这是 bug。
 
-**为什么这 6 个跑不起来**：
+**为什么这 5 个跑不起来**：
 
 | 子命令 | 根因 | 详细 |
 |---|---|---|
 | `sign` / `verify` / `validate` | GraalVM 25.0.4 CE 的 closed-world JCE 验证 | 见 [oracle/graal#13412](https://github.com/oracle/graal/issues/13412) — `BouncyCastleProvider` 需要 build time 注册到 `Security`，但工具链目前没有 BouncyCastleSubstitutions 那套方案（参见 [Quarkus #23527](https://github.com/quarkusio/quarkus/pull/23527) 怎么做的） |
-| `to-pdf` | PDFBox PDDocument.\<clinit\> 触发 AWT ColorModel | PDFBox 初始化时调 `System.loadLibrary("awt")`，substrate VM 没有 awt native library → UnsatisfiedLinkError |
 | `to-html` / `to-svg` | AWTMaker 父类触发 `sun/font/CFontManager` JNI | macOS 字体管理器在 native-image 下无法解析 → SIGABRT |
+
+> ℹ️ `to-pdf` 早期版本因 PDFBox 触发 AWT 也不工作；v0.1.3 切到
+> [`rightgenius/ofdrw` 2.4.0-openpdf.2 fork](https://github.com/rightgenius/ofdrw/tree/v2.4.0-openpdf.2) 后正常工作。
 
 完整支持矩阵：
 
 | 子命令 | native | fat-jar |
 |---|:---:|:---:|
 | `version`, `info` | ✅ | ✅ |
-| `to-png`, `extract` | ✅ | ✅ |
+| `to-png`, `to-pdf`, `extract` | ✅ | ✅ |
 | `merge`, `encrypt`, `decrypt` | ✅ | ✅ |
-| `to-pdf` | ❌ 不注册 | ✅ |
 | `to-html`, `to-svg` | ❌ 不注册 | ✅ |
 | `sign` | ❌ 不注册 | ✅ |
 | `verify` | ❌ 不注册 | ✅ |
